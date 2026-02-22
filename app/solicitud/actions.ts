@@ -5,6 +5,9 @@ import { FormData } from '@/lib/types'
 import { anthropic } from '@ai-sdk/anthropic'
 import { generateObject } from 'ai'
 import { z } from 'zod'
+import { appendToSheet } from '@/lib/google-sheets'
+import { createAirtableRecord } from '@/lib/airtable'
+import { backupFilesToDrive } from '@/lib/google-drive'
 
 const INEDataSchema = z.object({
   nombres: z.string().describe('First name(s) of the person'),
@@ -178,6 +181,38 @@ export async function submitSolicitud(formData: FormData) {
     console.error('Submit error:', error)
     return { success: false, error: error.message }
   }
+
+  // ── Async backups (fire-and-forget, do NOT await) ─────────────────────────
+  // 1. Google Sheets backup
+  appendToSheet(formData).catch((err) =>
+    console.error('[Backup] Google Sheets failed:', err)
+  )
+
+  // 2. Airtable backup
+  createAirtableRecord(formData).catch((err) =>
+    console.error('[Backup] Airtable failed:', err)
+  )
+
+  // 3. Google Drive file backup — collect all docs_ fields from formData
+  const docs: Record<string, string> = {}
+  const docKeys = [
+    'ine_frente', 'ine_reverso', 'talon',
+    'solicitud_p1', 'solicitud_p2', 'solicitud_p3',
+    'solicitud_p4', 'solicitud_p5', 'solicitud_p6',
+    'video',
+  ]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fd = formData as any
+  for (const key of docKeys) {
+    const path = fd[`docs_${key}`]
+    if (path) docs[key] = path
+  }
+  if (Object.keys(docs).length > 0) {
+    backupFilesToDrive(data.folio, docs).catch((err) =>
+      console.error('[Backup] Google Drive failed:', err)
+    )
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   return { success: true, id: data.id, folio: data.folio }
 }
