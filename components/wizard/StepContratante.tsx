@@ -129,7 +129,7 @@ export default function StepContratante({ formData, setFormData, onNext, onBack 
                 📷 Escanear INE con IA
               </p>
               <p className="text-xs text-gray-600 mt-0.5">
-                Toma foto del frente del INE y llenamos los datos automáticamente
+                Sube o toma foto del frente del INE y llenamos los datos automáticamente
               </p>
 
               {ocrState === 'compressing' && (
@@ -163,44 +163,92 @@ export default function StepContratante({ formData, setFormData, onNext, onBack 
               )}
             </div>
 
-            <div className="flex-shrink-0 flex flex-col items-center gap-1">
+            <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
               {inePreview ? (
                 <div className="relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={inePreview} alt="INE" className="w-16 h-10 object-cover rounded border" />
-                  <label
-                    htmlFor="ine-ocr-input"
-                    className="text-xs text-blue-600 underline cursor-pointer block text-center mt-1"
-                  >
-                    Cambiar
-                  </label>
+                  <div className="flex gap-2 mt-1">
+                    <label
+                      htmlFor="ine-ocr-camera"
+                      className="text-xs text-blue-600 underline cursor-pointer"
+                    >
+                      📷
+                    </label>
+                    <label
+                      htmlFor="ine-ocr-gallery"
+                      className="text-xs text-blue-600 underline cursor-pointer"
+                    >
+                      📁
+                    </label>
+                  </div>
                 </div>
               ) : (
-                <label
-                  htmlFor="ine-ocr-input"
-                  className={`
-                    flex items-center justify-center w-14 h-14 rounded-xl border-2 cursor-pointer
-                    ${ocrState === 'compressing' || ocrState === 'extracting'
-                      ? 'border-gray-200 bg-gray-100 cursor-not-allowed'
-                      : 'border-[#003087] bg-white hover:bg-blue-50 active:bg-blue-100'}
-                  `}
-                >
-                  {ocrState === 'compressing' || ocrState === 'extracting' ? (
-                    <svg className="animate-spin h-5 w-5 text-gray-400" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                    </svg>
-                  ) : (
-                    <span className="text-2xl">🪪</span>
-                  )}
-                </label>
+                <div className="flex gap-2">
+                  <label
+                    htmlFor="ine-ocr-camera"
+                    className={`
+                      flex flex-col items-center justify-center w-14 h-14 rounded-xl border-2 cursor-pointer
+                      ${ocrState === 'compressing' || ocrState === 'extracting'
+                        ? 'border-gray-200 bg-gray-100 cursor-not-allowed'
+                        : 'border-[#003087] bg-white hover:bg-blue-50 active:bg-blue-100'}
+                    `}
+                  >
+                    {ocrState === 'compressing' || ocrState === 'extracting' ? (
+                      <svg className="animate-spin h-5 w-5 text-gray-400" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                      </svg>
+                    ) : (
+                      <>
+                        <span className="text-xl">📷</span>
+                        <span className="text-[10px] text-gray-500">Cámara</span>
+                      </>
+                    )}
+                  </label>
+                  <label
+                    htmlFor="ine-ocr-gallery"
+                    className={`
+                      flex flex-col items-center justify-center w-14 h-14 rounded-xl border-2 cursor-pointer
+                      ${ocrState === 'compressing' || ocrState === 'extracting'
+                        ? 'border-gray-200 bg-gray-100 cursor-not-allowed'
+                        : 'border-[#003087] bg-white hover:bg-blue-50 active:bg-blue-100'}
+                    `}
+                  >
+                    {ocrState === 'compressing' || ocrState === 'extracting' ? (
+                      <svg className="animate-spin h-5 w-5 text-gray-400" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                      </svg>
+                    ) : (
+                      <>
+                        <span className="text-xl">📁</span>
+                        <span className="text-[10px] text-gray-500">Galería</span>
+                      </>
+                    )}
+                  </label>
+                </div>
               )}
+              {/* Camera input — opens camera directly on mobile */}
               <input
-                ref={ineInputRef}
-                id="ine-ocr-input"
+                id="ine-ocr-camera"
                 type="file"
                 accept="image/*"
                 capture="environment"
+                className="hidden"
+                disabled={ocrState === 'compressing' || ocrState === 'extracting'}
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) handleINEUpload(file)
+                  e.target.value = ''
+                }}
+              />
+              {/* Gallery/files input — opens photo library or file picker */}
+              <input
+                ref={ineInputRef}
+                id="ine-ocr-gallery"
+                type="file"
+                accept="image/*,.pdf"
                 className="hidden"
                 disabled={ocrState === 'compressing' || ocrState === 'extracting'}
                 onChange={(e) => {
