@@ -78,9 +78,10 @@ export default function StepContratante({ formData, setFormData, onNext, onBack 
         contratante_estado: d.domicilio?.estado || '',
       })
       setOcrState('done')
-    } catch (err) {
-      console.error('INE upload error:', err)
-      setOcrError('Error procesando imagen. Intenta de nuevo.')
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err)
+      console.error('INE upload error:', errMsg, err)
+      setOcrError(`Error: ${errMsg.substring(0, 150)}`)
       setOcrState('error')
     }
   }

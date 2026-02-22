@@ -28,9 +28,26 @@ const INEDataSchema = z.object({
 })
 
 export async function extractINEData(imageBase64: string, mimeType: string) {
+  const timestamp = new Date().toISOString()
+  console.log(`[${timestamp}] INE OCR request received. mimeType=${mimeType}, base64Length=${imageBase64?.length || 0}`)
+  
+  if (!imageBase64 || imageBase64.length < 100) {
+    console.error(`[${timestamp}] INE OCR: base64 data too short or empty`)
+    return { success: false, error: 'Imagen vacía o corrupta. Intenta de nuevo.' }
+  }
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error(`[${timestamp}] INE OCR: ANTHROPIC_API_KEY not set!`)
+    return { success: false, error: 'Error de configuración del servidor. Contacta al administrador.' }
+  }
+
   try {
+    // Build the data URL from base64
+    const dataUrl = `data:${mimeType};base64,${imageBase64}`
+    
+    console.log(`[${timestamp}] INE OCR: calling Anthropic Claude vision...`)
     const { object } = await generateObject({
-      model: anthropic('claude-3-5-sonnet-20241022'),
+      model: anthropic('claude-sonnet-4-20250514'),
       schema: INEDataSchema,
       messages: [
         {
@@ -38,8 +55,7 @@ export async function extractINEData(imageBase64: string, mimeType: string) {
           content: [
             {
               type: 'image',
-              image: imageBase64,
-              mediaType: mimeType as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif',
+              image: new URL(dataUrl),
             },
             {
               type: 'text',
@@ -49,10 +65,17 @@ export async function extractINEData(imageBase64: string, mimeType: string) {
         },
       ],
     })
+    console.log(`[${timestamp}] INE OCR success: ${object.nombres} ${object.apellido_paterno}`)
     return { success: true, data: object }
-  } catch (error) {
-    console.error('INE OCR error:', error)
-    return { success: false, error: 'No se pudo leer el INE. Por favor llena los datos manualmente.' }
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error)
+    const errStack = error instanceof Error ? error.stack : ''
+    console.error(`[${timestamp}] INE OCR error: ${errMsg}`)
+    console.error(`[${timestamp}] INE OCR stack: ${errStack}`)
+    return { 
+      success: false, 
+      error: `Error al procesar INE: ${errMsg.substring(0, 100)}. Llena los datos manualmente.` 
+    }
   }
 }
 
