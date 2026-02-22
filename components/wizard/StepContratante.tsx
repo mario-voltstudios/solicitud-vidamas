@@ -41,9 +41,15 @@ export default function StepContratante({ formData, setFormData, onNext, onBack 
       const previewUrl = URL.createObjectURL(compressed)
       setInePreview(previewUrl)
       
-      // Convert to base64 for server action
-      const buffer = await compressed.arrayBuffer()
-      const base64 = Buffer.from(buffer).toString('base64')
+      // Convert to base64 for server action (browser-compatible)
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          const dataUrl = reader.result as string
+          resolve(dataUrl.split(',')[1]) // strip data:image/jpeg;base64, prefix
+        }
+        reader.readAsDataURL(compressed)
+      })
       
       setOcrState('extracting')
       const result = await extractINEData(base64, 'image/jpeg')
