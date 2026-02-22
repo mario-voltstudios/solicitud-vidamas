@@ -2,6 +2,56 @@
 
 import { createServerClient } from '@/lib/supabase'
 import { FormData } from '@/lib/types'
+import { anthropic } from '@ai-sdk/anthropic'
+import { generateObject } from 'ai'
+import { z } from 'zod'
+
+const INEDataSchema = z.object({
+  nombres: z.string().describe('First name(s) of the person'),
+  apellido_paterno: z.string().describe('Paternal last name'),
+  apellido_materno: z.string().describe('Maternal last name'),
+  fecha_nacimiento: z.string().describe('Date of birth in YYYY-MM-DD format'),
+  sexo: z.enum(['M', 'F']).describe('Sex: M for masculino, F for femenino'),
+  curp: z.string().describe('CURP (18 characters)'),
+  clave_elector: z.string().describe('Clave de elector (voter key)'),
+  domicilio: z.object({
+    calle: z.string().describe('Street name'),
+    numero: z.string().describe('Street number'),
+    colonia: z.string().describe('Neighborhood/colonia'),
+    cp: z.string().describe('Postal code (5 digits)'),
+    municipio: z.string().describe('Municipality or borough'),
+    estado: z.string().describe('State name'),
+  }),
+})
+
+export async function extractINEData(imageBase64: string, mimeType: string) {
+  try {
+    const { object } = await generateObject({
+      model: anthropic('claude-3-5-sonnet-20241022'),
+      schema: INEDataSchema,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              image: imageBase64,
+              mediaType: mimeType as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif',
+            },
+            {
+              type: 'text',
+              text: 'Extract all data from this Mexican INE (credencial para votar) front. Return all fields in UPPERCASE. For fecha_nacimiento use YYYY-MM-DD format. If a field is not visible or unclear, return an empty string.',
+            },
+          ],
+        },
+      ],
+    })
+    return { success: true, data: object }
+  } catch (error) {
+    console.error('INE OCR error:', error)
+    return { success: false, error: 'No se pudo leer el INE. Por favor llena los datos manualmente.' }
+  }
+}
 
 export async function validateAgente(clave: string) {
   const supabase = createServerClient()

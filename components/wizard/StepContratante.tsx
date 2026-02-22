@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormData, ESTADOS_MX } from '@/lib/types'
+import { extractINEData } from '@/app/solicitud/actions'
+import imageCompression from 'browser-image-compression'
 
 interface StepContratanteProps {
   formData: FormData
@@ -17,6 +19,65 @@ interface StepContratanteProps {
 
 export default function StepContratante({ formData, setFormData, onNext, onBack }: StepContratanteProps) {
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [ocrState, setOcrState] = useState<'idle' | 'compressing' | 'extracting' | 'done' | 'error'>('idle')
+  const [ocrError, setOcrError] = useState<string>('')
+  const [inePreview, setInePreview] = useState<string>('')
+  const ineInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleINEUpload(file: File) {
+    setOcrState('compressing')
+    setOcrError('')
+    try {
+      // Compress image
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 2,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        fileType: 'image/jpeg',
+        initialQuality: 0.8,
+      })
+      
+      // Show preview
+      const previewUrl = URL.createObjectURL(compressed)
+      setInePreview(previewUrl)
+      
+      // Convert to base64 for server action
+      const buffer = await compressed.arrayBuffer()
+      const base64 = Buffer.from(buffer).toString('base64')
+      
+      setOcrState('extracting')
+      const result = await extractINEData(base64, 'image/jpeg')
+      
+      if (!result.success || !result.data) {
+        setOcrError(result.error || 'Error al leer el INE')
+        setOcrState('error')
+        return
+      }
+
+      const d = result.data
+      setFormData({
+        contratante_nombres: d.nombres || '',
+        contratante_ap_paterno: d.apellido_paterno || '',
+        contratante_ap_materno: d.apellido_materno || '',
+        contratante_fecha_nac: d.fecha_nacimiento || '',
+        contratante_genero: d.sexo || '',
+        contratante_curp: d.curp || '',
+        contratante_num_id: d.clave_elector || '',
+        contratante_tipo_id: 'INE',
+        contratante_calle: d.domicilio?.calle || '',
+        contratante_num_ext: d.domicilio?.numero || '',
+        contratante_colonia: d.domicilio?.colonia || '',
+        contratante_cp: d.domicilio?.cp || '',
+        contratante_municipio: d.domicilio?.municipio || '',
+        contratante_estado: d.domicilio?.estado || '',
+      })
+      setOcrState('done')
+    } catch (err) {
+      console.error('INE upload error:', err)
+      setOcrError('Error procesando imagen. Intenta de nuevo.')
+      setOcrState('error')
+    }
+  }
 
   function update(field: keyof FormData, value: string) {
     setFormData({ [field]: value })
@@ -55,16 +116,101 @@ export default function StepContratante({ formData, setFormData, onNext, onBack 
         <p className="text-sm text-gray-500">Información del titular de la póliza</p>
       </div>
 
-      {/* INE Upload Banner */}
-      <Card className="bg-blue-50 border-blue-200">
+      {/* INE OCR Upload */}
+      <Card className={
+        ocrState === 'done' ? 'bg-green-50 border-green-200' :
+        ocrState === 'error' ? 'bg-red-50 border-red-200' :
+        'bg-blue-50 border-blue-200'
+      }>
         <CardContent className="pt-4 pb-4">
-          <p className="text-sm text-blue-700 font-medium">📷 Foto del INE (opcional)</p>
-          <p className="text-xs text-blue-600 mt-1">
-            Puedes tomar una foto del INE para llenar los datos más rápido, o llenar manualmente.
-          </p>
-          <p className="text-xs text-blue-500 mt-1 italic">
-            OCR automático disponible próximamente. Por ahora, llena manualmente.
-          </p>
+          <div className="flex items-start gap-3">
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-[#003087]">
+                📷 Escanear INE con IA
+              </p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                Toma foto del frente del INE y llenamos los datos automáticamente
+              </p>
+
+              {ocrState === 'compressing' && (
+                <div className="flex items-center gap-2 mt-2">
+                  <svg className="animate-spin h-4 w-4 text-blue-600" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  <span className="text-xs text-blue-700">Comprimiendo imagen...</span>
+                </div>
+              )}
+
+              {ocrState === 'extracting' && (
+                <div className="flex items-center gap-2 mt-2">
+                  <svg className="animate-spin h-4 w-4 text-blue-600" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  <span className="text-xs text-blue-700">Leyendo datos con IA...</span>
+                </div>
+              )}
+
+              {ocrState === 'done' && (
+                <p className="text-xs text-green-700 mt-1 font-medium">
+                  ✓ Datos extraídos. Revisa y corrige si es necesario.
+                </p>
+              )}
+
+              {ocrState === 'error' && (
+                <p className="text-xs text-red-600 mt-1">{ocrError}</p>
+              )}
+            </div>
+
+            <div className="flex-shrink-0 flex flex-col items-center gap-1">
+              {inePreview ? (
+                <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={inePreview} alt="INE" className="w-16 h-10 object-cover rounded border" />
+                  <label
+                    htmlFor="ine-ocr-input"
+                    className="text-xs text-blue-600 underline cursor-pointer block text-center mt-1"
+                  >
+                    Cambiar
+                  </label>
+                </div>
+              ) : (
+                <label
+                  htmlFor="ine-ocr-input"
+                  className={`
+                    flex items-center justify-center w-14 h-14 rounded-xl border-2 cursor-pointer
+                    ${ocrState === 'compressing' || ocrState === 'extracting'
+                      ? 'border-gray-200 bg-gray-100 cursor-not-allowed'
+                      : 'border-[#003087] bg-white hover:bg-blue-50 active:bg-blue-100'}
+                  `}
+                >
+                  {ocrState === 'compressing' || ocrState === 'extracting' ? (
+                    <svg className="animate-spin h-5 w-5 text-gray-400" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                  ) : (
+                    <span className="text-2xl">🪪</span>
+                  )}
+                </label>
+              )}
+              <input
+                ref={ineInputRef}
+                id="ine-ocr-input"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                disabled={ocrState === 'compressing' || ocrState === 'extracting'}
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) handleINEUpload(file)
+                  e.target.value = ''
+                }}
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
