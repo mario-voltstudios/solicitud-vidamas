@@ -92,7 +92,7 @@ export default function StepContratante({ formData, setFormData, onNext, onBack 
     if (!formData.contratante_ap_paterno) newErrors.contratante_ap_paterno = 'Requerido'
     if (!formData.contratante_fecha_nac) newErrors.contratante_fecha_nac = 'Requerido'
     if (!formData.contratante_genero) newErrors.contratante_genero = 'Requerido'
-    if (!formData.contratante_curp) newErrors.contratante_curp = 'Requerido'
+    if (!formData.contratante_rfc) newErrors.contratante_rfc = 'Requerido'
     if (!formData.contratante_telefono) newErrors.contratante_telefono = 'Requerido'
 
     if (Object.keys(newErrors).length > 0) {
@@ -334,28 +334,28 @@ export default function StepContratante({ formData, setFormData, onNext, onBack 
           </div>
 
           <div>
-            <Label htmlFor="curp">CURP *</Label>
+            <Label htmlFor="curp">CURP</Label>
             <Input
               id="curp"
-              placeholder="CURP (18 caracteres)"
+              placeholder="CURP (opcional, 18 caracteres)"
               value={formData.contratante_curp}
               onChange={(e) => update('contratante_curp', e.target.value.toUpperCase())}
               maxLength={18}
               className={`${inputClass} font-mono`}
             />
-            {errors.contratante_curp && <p className={errorClass}>{errors.contratante_curp}</p>}
           </div>
 
           <div>
-            <Label htmlFor="rfc">RFC</Label>
+            <Label htmlFor="rfc">RFC *</Label>
             <Input
               id="rfc"
-              placeholder="RFC (opcional)"
+              placeholder="RFC del contratante"
               value={formData.contratante_rfc}
               onChange={(e) => update('contratante_rfc', e.target.value.toUpperCase())}
               maxLength={13}
               className={`${inputClass} font-mono`}
             />
+            {errors.contratante_rfc && <p className={errorClass}>{errors.contratante_rfc}</p>}
           </div>
         </CardContent>
       </Card>
