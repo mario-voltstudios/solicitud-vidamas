@@ -156,8 +156,18 @@ export async function generateFolio(clave_agente: string, semana: { year: number
 export async function submitSolicitud(formData: FormData) {
   const supabase = createServerClient()
 
+  // Re-generate folio at submit time to avoid duplicates
+  // (folio from Step 1 was generated before record existed)
+  let finalFolio = formData.folio
+  if (formData.clave_agente && formData.year && formData.week_number) {
+    finalFolio = await generateFolio(formData.clave_agente, {
+      year: formData.year,
+      week_number: formData.week_number,
+    })
+  }
+
   const payload = {
-    folio: formData.folio,
+    folio: finalFolio,
     clave_agente: formData.clave_agente,
     status: 'pendiente',
     // contratante
