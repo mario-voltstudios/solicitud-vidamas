@@ -23,6 +23,8 @@ function getSheetsClient() {
 }
 
 export async function appendToSheet(formData: FormData): Promise<void> {
+  console.log(`[Sheets] Starting append for folio ${formData.folio}, cobro: ${formData.forma_cobro}`)
+
   const sheets = getSheetsClient()
 
   const contratanteNombreCompleto = [
@@ -33,6 +35,15 @@ export async function appendToSheet(formData: FormData): Promise<void> {
     .filter(Boolean)
     .join(' ')
 
+  // For CLABE: include bank info in dependencia column, matricula stays empty
+  const dependenciaOrBanco = formData.forma_cobro === 'clabe'
+    ? `CLABE - ${formData.banco || 'N/A'}`
+    : formData.contratante_dependencia || ''
+
+  const matriculaOrClabe = formData.forma_cobro === 'clabe'
+    ? formData.clabe || ''
+    : formData.matricula || ''
+
   const row = [
     formData.folio || '',
     formData.clave_agente || '',
@@ -42,8 +53,8 @@ export async function appendToSheet(formData: FormData): Promise<void> {
     formData.contratante_email || '',
     formData.contratante_telefono || '',
     formData.forma_cobro || '',
-    formData.contratante_dependencia || '',
-    formData.matricula || '',
+    dependenciaOrBanco,
+    matriculaOrClabe,
     formData.plan || '',
     formData.periodicidad || '',
     formData.prima_base || '',
@@ -56,15 +67,19 @@ export async function appendToSheet(formData: FormData): Promise<void> {
     'Prospera', // gerente_comercial
   ]
 
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: SHEET_ID,
-    range: `${SHEET_NAME}!A:T`,
-    valueInputOption: 'RAW',
-    insertDataOption: 'INSERT_ROWS',
-    requestBody: {
-      values: [row],
-    },
-  })
-
-  console.log(`[Sheets] Row appended for folio ${formData.folio}`)
+  try {
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: SHEET_ID,
+      range: `${SHEET_NAME}!A:T`,
+      valueInputOption: 'RAW',
+      insertDataOption: 'INSERT_ROWS',
+      requestBody: {
+        values: [row],
+      },
+    })
+    console.log(`[Sheets] ✅ Row appended for folio ${formData.folio}`)
+  } catch (err) {
+    console.error(`[Sheets] ❌ Failed for folio ${formData.folio}:`, err)
+    throw err
+  }
 }

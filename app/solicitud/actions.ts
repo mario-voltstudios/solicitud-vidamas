@@ -249,13 +249,16 @@ export async function submitSolicitud(formData: FormData) {
   }
 
   // ── Async backups (fire-and-forget, do NOT await) ─────────────────────────
+  // Use the final folio (server-generated) for all backups
+  const backupData = { ...formData, folio: data.folio }
+
   // 1. Google Sheets backup
-  appendToSheet(formData).catch((err) =>
+  appendToSheet(backupData).catch((err) =>
     console.error('[Backup] Google Sheets failed:', err)
   )
 
   // 2. Airtable backup
-  createAirtableRecord(formData).catch((err) =>
+  createAirtableRecord(backupData).catch((err) =>
     console.error('[Backup] Airtable failed:', err)
   )
 
