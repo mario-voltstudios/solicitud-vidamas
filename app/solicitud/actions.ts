@@ -154,6 +154,19 @@ export async function generateFolio(clave_agente: string, semana: { year: number
 }
 
 export async function submitSolicitud(formData: FormData) {
+  // Server-side validation: require signature
+  if (!formData.firma_base64 || !formData.firma_base64.startsWith('data:image/')) {
+    return { success: false, error: 'Firma requerida. Por favor firma antes de enviar.' }
+  }
+
+  // Server-side validation: require essential fields
+  if (!formData.clave_agente) {
+    return { success: false, error: 'Clave de agente requerida.' }
+  }
+  if (!formData.contratante_nombres || !formData.contratante_ap_paterno) {
+    return { success: false, error: 'Datos del contratante incompletos.' }
+  }
+
   const supabase = createServerClient()
 
   // Re-generate folio at submit time to avoid duplicates

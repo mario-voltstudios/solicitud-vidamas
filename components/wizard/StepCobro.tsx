@@ -30,7 +30,25 @@ export default function StepCobro({ formData, setFormData, onNext, onBack }: Ste
   }
 
   function setFormaCobro(tipo: 'nomina' | 'clabe') {
-    setFormData({ forma_cobro: tipo })
+    if (tipo === 'clabe') {
+      // Clear nómina-specific fields when switching to CLABE
+      setFormData({
+        forma_cobro: tipo,
+        contratante_dependencia: '',
+        matricula: '',
+        sub_dependencia: '',
+        clave_delegacional: '',
+        folio_contrato: '',
+      })
+    } else {
+      // Clear CLABE-specific fields when switching to nómina
+      setFormData({
+        forma_cobro: tipo,
+        clabe: '',
+        banco: '',
+        fecha_inicio_cobro: '',
+      })
+    }
     setErrors({})
   }
 
