@@ -42,10 +42,22 @@ export async function extractINEData(imageBase64: string, mimeType: string) {
   }
 
   try {
-    // Build the data URL from base64
-    const dataUrl = `data:${mimeType};base64,${imageBase64}`
+    const isPDF = mimeType === 'application/pdf'
     
-    console.log(`[${timestamp}] INE OCR: calling Anthropic Claude vision...`)
+    console.log(`[${timestamp}] INE OCR: calling Anthropic Claude vision... isPDF=${isPDF}`)
+    
+    // Build content based on file type
+    const fileContent = isPDF
+      ? {
+          type: 'file' as const,
+          data: imageBase64,
+          mimeType: 'application/pdf' as const,
+        }
+      : {
+          type: 'image' as const,
+          image: `data:${mimeType};base64,${imageBase64}`,
+        }
+    
     const { object } = await generateObject({
       model: anthropic('claude-sonnet-4-20250514'),
       schema: INEDataSchema,
@@ -53,10 +65,7 @@ export async function extractINEData(imageBase64: string, mimeType: string) {
         {
           role: 'user',
           content: [
-            {
-              type: 'image',
-              image: new URL(dataUrl),
-            },
+            fileContent,
             {
               type: 'text',
               text: 'Extract all data from this Mexican INE (credencial para votar) front. Return all fields in UPPERCASE. For fecha_nacimiento use YYYY-MM-DD format. If a field is not visible or unclear, return an empty string.',

@@ -28,31 +28,65 @@ export default function StepContratante({ formData, setFormData, onNext, onBack 
     setOcrState('compressing')
     setOcrError('')
     try {
-      // Compress image
-      const compressed = await imageCompression(file, {
-        maxSizeMB: 2,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-        fileType: 'image/jpeg',
-        initialQuality: 0.8,
-      })
+      const isImage = file.type.startsWith('image/')
+      const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
       
-      // Show preview
-      const previewUrl = URL.createObjectURL(compressed)
-      setInePreview(previewUrl)
+      let base64: string
+      let mimeType: string
       
-      // Convert to base64 for server action (browser-compatible)
-      const base64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader()
-        reader.onloadend = () => {
-          const dataUrl = reader.result as string
-          resolve(dataUrl.split(',')[1]) // strip data:image/jpeg;base64, prefix
-        }
-        reader.readAsDataURL(compressed)
-      })
+      if (isImage) {
+        // Compress image
+        const compressed = await imageCompression(file, {
+          maxSizeMB: 2,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+          fileType: 'image/jpeg',
+          initialQuality: 0.8,
+        })
+        
+        // Show preview
+        const previewUrl = URL.createObjectURL(compressed)
+        setInePreview(previewUrl)
+        
+        // Convert to base64 (browser-compatible)
+        base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            const dataUrl = reader.result as string
+            resolve(dataUrl.split(',')[1])
+          }
+          reader.readAsDataURL(compressed)
+        })
+        mimeType = 'image/jpeg'
+      } else if (isPDF) {
+        // PDF — send directly without compression
+        base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            const dataUrl = reader.result as string
+            resolve(dataUrl.split(',')[1])
+          }
+          reader.readAsDataURL(file)
+        })
+        mimeType = 'application/pdf'
+        setInePreview(null) // No image preview for PDFs
+      } else {
+        // Try treating as image anyway (some phones report wrong MIME)
+        base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onloadend = () => {
+            const dataUrl = reader.result as string
+            resolve(dataUrl.split(',')[1])
+          }
+          reader.readAsDataURL(file)
+        })
+        mimeType = file.type || 'image/jpeg'
+        const previewUrl = URL.createObjectURL(file)
+        setInePreview(previewUrl)
+      }
       
       setOcrState('extracting')
-      const result = await extractINEData(base64, 'image/jpeg')
+      const result = await extractINEData(base64, mimeType)
       
       if (!result.success || !result.data) {
         setOcrError(result.error || 'Error al leer el INE')
