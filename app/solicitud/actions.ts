@@ -46,33 +46,42 @@ export async function extractINEData(imageBase64: string, mimeType: string) {
     
     console.log(`[${timestamp}] INE OCR: calling Anthropic Claude vision... isPDF=${isPDF}`)
     
-    // Build content based on file type
-    const fileContent = isPDF
-      ? {
-          type: 'file' as const,
-          data: imageBase64,
-          mimeType: 'application/pdf' as const,
-        }
-      : {
-          type: 'image' as const,
-          image: `data:${mimeType};base64,${imageBase64}`,
-        }
+    const promptText = 'Extract all data from this Mexican INE (credencial para votar) front. Return all fields in UPPERCASE. For fecha_nacimiento use YYYY-MM-DD format. If a field is not visible or unclear, return an empty string.'
+    
+    // Build messages based on file type
+    const messages = isPDF
+      ? [
+          {
+            role: 'user' as const,
+            content: [
+              {
+                type: 'file' as const,
+                data: imageBase64,
+                mimeType: 'application/pdf' as const,
+                mediaType: 'application/pdf' as const,
+              },
+              { type: 'text' as const, text: promptText },
+            ],
+          },
+        ]
+      : [
+          {
+            role: 'user' as const,
+            content: [
+              {
+                type: 'image' as const,
+                image: `data:${mimeType};base64,${imageBase64}`,
+              },
+              { type: 'text' as const, text: promptText },
+            ],
+          },
+        ]
     
     const { object } = await generateObject({
       model: anthropic('claude-sonnet-4-20250514'),
       schema: INEDataSchema,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            fileContent,
-            {
-              type: 'text',
-              text: 'Extract all data from this Mexican INE (credencial para votar) front. Return all fields in UPPERCASE. For fecha_nacimiento use YYYY-MM-DD format. If a field is not visible or unclear, return an empty string.',
-            },
-          ],
-        },
-      ],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      messages: messages as any,
     })
     console.log(`[${timestamp}] INE OCR success: ${object.nombres} ${object.apellido_paterno}`)
     return { success: true, data: object }
