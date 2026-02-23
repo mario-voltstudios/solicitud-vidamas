@@ -54,6 +54,7 @@ export interface FormData {
   contratante_municipio: string
   contratante_ocupacion: string
   contratante_dependencia: string
+  nexos_delincuencia: 'no' | 'si' | ''
 
   // Step 3: Cobro
   forma_cobro: 'nomina' | 'clabe' | ''
@@ -118,6 +119,7 @@ export const INITIAL_FORM_DATA: FormData = {
   contratante_municipio: '',
   contratante_ocupacion: '',
   contratante_dependencia: '',
+  nexos_delincuencia: 'no',
   forma_cobro: '',
   clave_delegacional: '',
   matricula: '',

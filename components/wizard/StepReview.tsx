@@ -217,6 +217,7 @@ export default function StepReview({ formData, onBack, onGoToStep }: StepReviewP
         <DataRow label="Teléfono" value={formData.contratante_telefono} />
         <DataRow label="Email" value={formData.contratante_email} />
         <DataRow label="Dirección" value={[formData.contratante_calle, formData.contratante_num_ext, formData.contratante_colonia, formData.contratante_municipio, formData.contratante_estado].filter(Boolean).join(', ')} />
+        <DataRow label="Nexos delincuencia" value={formData.nexos_delincuencia === 'no' ? '✅ No' : '❌ Sí'} />
       </Section>
 
       {/* Cobro */}

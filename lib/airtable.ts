@@ -29,6 +29,8 @@ export async function createAirtableRecord(formData: FormData): Promise<void> {
     formData.prima_base ? `Prima: $${formData.prima_base}` : '',
     formData.suma_asegurada ? `Suma Asegurada: $${formData.suma_asegurada}` : '',
     formData.matricula ? `Matrícula: ${formData.matricula}` : '',
+    `Nexos delincuencia: ${formData.nexos_delincuencia || 'no'}`,
+    'Gerente comercial: Prospera',
   ]
     .filter(Boolean)
     .join(' | ')

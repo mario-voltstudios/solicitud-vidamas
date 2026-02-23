@@ -135,6 +135,8 @@ export default function StepContratante({ formData, setFormData, onNext, onBack 
     if (!formData.contratante_genero) newErrors.contratante_genero = 'Requerido'
     if (!formData.contratante_rfc) newErrors.contratante_rfc = 'Requerido'
     if (!formData.contratante_telefono) newErrors.contratante_telefono = 'Requerido'
+    if (formData.nexos_delincuencia === 'si') newErrors.nexos_delincuencia = 'No se puede proceder con nexos a la delincuencia organizada'
+    if (!formData.nexos_delincuencia) newErrors.nexos_delincuencia = 'Debes responder esta pregunta'
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -572,6 +574,54 @@ export default function StepContratante({ formData, setFormData, onNext, onBack 
             onChange={(e) => update('contratante_ocupacion', e.target.value.toUpperCase())}
             className={inputClass}
           />
+        </CardContent>
+      </Card>
+
+      {/* Nexos con Delincuencia Organizada */}
+      <Card className={formData.nexos_delincuencia === 'si' ? 'border-red-500 border-2' : ''}>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+            Declaración Importante
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-700 mb-3">
+            ¿El contratante tiene algún vínculo o nexo con la delincuencia organizada?
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => update('nexos_delincuencia', 'no')}
+              className={`
+                p-3 rounded-xl border-2 text-center transition-all
+                ${formData.nexos_delincuencia === 'no'
+                  ? 'border-green-500 bg-green-50 text-green-700 font-semibold'
+                  : 'border-gray-200 bg-white text-gray-600'}
+              `}
+            >
+              ✅ No
+            </button>
+            <button
+              onClick={() => update('nexos_delincuencia', 'si')}
+              className={`
+                p-3 rounded-xl border-2 text-center transition-all
+                ${formData.nexos_delincuencia === 'si'
+                  ? 'border-red-500 bg-red-50 text-red-700 font-semibold'
+                  : 'border-gray-200 bg-white text-gray-600'}
+              `}
+            >
+              ❌ Sí
+            </button>
+          </div>
+          {formData.nexos_delincuencia === 'si' && (
+            <div className="mt-3 bg-red-50 border border-red-200 rounded-xl p-3">
+              <p className="text-red-700 text-sm font-semibold">⚠️ No se puede proceder</p>
+              <p className="text-red-600 text-xs mt-1">
+                Las personas con nexos a la delincuencia organizada no son elegibles para el seguro Vida Más.
+                Contacta a tu gerente si tienes dudas.
+              </p>
+            </div>
+          )}
+          {errors.nexos_delincuencia && <p className="text-red-500 text-xs mt-1">{errors.nexos_delincuencia}</p>}
         </CardContent>
       </Card>
 

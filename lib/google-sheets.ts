@@ -52,11 +52,13 @@ export async function appendToSheet(formData: FormData): Promise<void> {
     formData.beneficiarios ? JSON.stringify(formData.beneficiarios) : '[]',
     'pendiente', // status
     new Date().toISOString(), // created_at
+    formData.nexos_delincuencia || 'no', // nexos_delincuencia
+    'Prospera', // gerente_comercial
   ]
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
-    range: `${SHEET_NAME}!A:R`,
+    range: `${SHEET_NAME}!A:T`,
     valueInputOption: 'RAW',
     insertDataOption: 'INSERT_ROWS',
     requestBody: {
