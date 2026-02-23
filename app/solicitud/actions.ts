@@ -181,8 +181,8 @@ export async function submitSolicitud(formData: FormData) {
     contratante_municipio: formData.contratante_municipio || null,
     contratante_ocupacion: formData.contratante_ocupacion || null,
     contratante_dependencia: formData.contratante_dependencia || null,
-    // nexos_delincuencia and gerente_comercial stored in Google Sheets/Airtable
-    // DB columns pending migration — will be added via Supabase dashboard
+    nexos_delincuencia: formData.nexos_delincuencia || 'no',
+    gerente_comercial: 'Prospera',
     // cobro
     forma_cobro: formData.forma_cobro || null,
     clave_delegacional: formData.clave_delegacional || null,
