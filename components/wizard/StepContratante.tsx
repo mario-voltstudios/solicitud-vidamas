@@ -69,7 +69,7 @@ export default function StepContratante({ formData, setFormData, onNext, onBack 
           reader.readAsDataURL(file)
         })
         mimeType = 'application/pdf'
-        setInePreview(null) // No image preview for PDFs
+        setInePreview('') // No image preview for PDFs
       } else {
         // Try treating as image anyway (some phones report wrong MIME)
         base64 = await new Promise<string>((resolve) => {
