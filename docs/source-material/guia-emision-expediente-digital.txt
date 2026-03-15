@@ -1,0 +1,593 @@
+﻿📋 GUÍA DE EMISIÓN Y EXPEDIENTE DIGITAL
+PROSPERA SEGUROS — GNP Vida Más Constante
+ACERCA DE ESTA GUÍA
+Esta guía cubre el proceso completo de emisión de pólizas de Vida Más Constante en el Portal GNP Intermediarios (portalintermediarios.gnp.com.mx) y la carga de documentos al Expediente Digital. Aplica para emisores humanos: Lenny, Chava, y cualquier persona del equipo que realice emisiones para Prospera.
+
+
+⚠ ️ REGLA DE ORO: El Paso 2 (Expediente Digital) DEBE completarse dentro de las 6 horas siguientes a la emisión. Si no se puede completar en ese tiempo, escalar inmediatamente con Mario.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FLUJO GENERAL DEL PROCESO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DIAGRAMA DE CARRIL (SWIMLANE)
+
+
+AGENTE ────────────────────────────────────────────────────────
+  │  1. Llena la solicitud (Paperform vidamas.paperform.co)
+  │  2. Toma foto de INE (frente y vuelta) + talón de nómina
+  │  3. Graba video declaración del cliente aceptando la póliza
+  │  4. Envía documentos al emisor
+  ↓
+EMISOR (Lenny/Chava) ──────────────────────────────────────────
+  │  PASO 1: Verifica talón → determina estructura → emite en el Portal GNP Intermediarios
+  │  PASO 2: Completa solicitud en PDFfiller → descarga páginas
+  │  PASO 2: Carga documentos al Expediente Digital de GNP
+  │  PASO 2: Actualiza registro en ASTRO (Stacker)
+  ↓
+GNP SISTEMA ────────────────────────────────────────────────────
+  │  Recibe documentos del Expediente Digital
+  │  Valida documentación completa
+  │  Instala la póliza en nómina
+  └  Primer descuento quincenal al empleado
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASO 0: VERIFICACIÓN PREVIA — ANTES DE INICIAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+⚠️ NUNCA abrir el Portal GNP sin tener estos documentos listos y revisados.
+
+
+Documentos a revisar ANTES de empezar:
+  ☐  INE del asegurado (frente y vuelta) — legible, vigente
+  ☐  Talón de nómina — el más reciente
+  ☐  Solicitud Paperform — datos del agente
+
+
+Del talón de nómina, identificar:
+  • Tipo de Contratación (TC): determina si es ACTIVO, JUBILADO, o ESTATUTO A
+  • Clave Delegacional: determina la subdependencia
+  • Región/Ubicación: determina el folio/contrato
+
+
+TABLA: TIPO DE CONTRATACIÓN → ESTRUCTURA EN EL PORTAL GNP
+
+
+TC 01 (Confianza)  → Concepto 195 → IMSS ACTIVOS → Contrato 15
+TC 02 (Base)       → Concepto 195 → IMSS ACTIVOS → Contrato 15
+TC 07 (Becados)    → Concepto 195 → IMSS ACTIVOS → Contrato 15
+TC 09 (Residentes) → Concepto 195 → IMSS ACTIVOS → Contrato 15
+TC 10 (Jub. Ant.)  → Concepto 395 → IMSS JUBILADOS → Contrato 16
+TC 11 (Jub. Act.)  → Concepto 395 → IMSS JUBILADOS → Contrato 16
+TC 0 (Estatuto A)  → Concepto 995 → IMSS ESTATUTO A → Contrato 17
+Mandos Superiores  → Concepto 195 → IMSS MANDOS → Contrato 18
+
+
+TABLA: FOLIOS POR DEPENDENCIA
+
+
+DEPENDENCIA                              FOLIO
+─────────────────────────────────────────────────────
+IMSS (General DXN)                       N0058293
+IMSS EM Oriente                          N0063319
+IMSS EM Poniente                         N0080385
+IMSS Activos 2 Noreste D.F.              N0084530
+IMSS Oaxaca Prospera                     N0029858
+IMSS Morelos Próspera                    N0091500
+IMSS Querétaro Prospera                  N0091583
+ISSSTE (DXN Nomina)                      N0051765
+GOB CDMX (DXN Quincenal)                 N0073208
+SEP Media Superior                       N0058292 / N0064867
+SEP Central                              N0064865 / N0082480
+SEP Central Prospera                     N0083013
+UAQ (Univ. Autónoma de Querétaro)        N0091588
+GEM (Banco Quincenal Prospera)           N0078461
+Familiares y Empresarial (Banco)         N0078790
+Guardia Nacional (Banco Quincenal)       N0080562
+ISSSTE Auto Domiciliación                P0076946
+SEP Auto Domiciliación                   P0076945
+Gob CDMX Auto Domiciliación              P0073208
+G Nacional Auto Domiciliación            P0081272
+TMK Auto Domiciliación                   P0081271
+Educación Tabasco Próspera               P0093743
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASO 0.5: VERIFICACIÓN DEL VIDEO DE PAPERFORM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ OBLIGATORIO — Antes de cualquier emisión, revisar el video del prospecto.
+El campo de video en Paperform (field ID: dn3cj) debe revisarse para confirmar que el prospecto menciona TODOS los siguientes puntos:
+  1. NOMBRE COMPLETO — El prospecto dice su nombre completo
+  2. FECHA — Menciona la fecha actual del video
+  3. NOMBRE DEL AGENTE — Menciona el nombre del agente que lo atendió
+  4. ACEPTACIÓN DE LA PÓLIZA NUEVA DE GNP — Acepta explícitamente la nueva póliza de GNP
+  5. MONTO A DESCONTAR — Menciona el monto que se le va a descontar de nómina
+  6. NOMBRE Y PORCENTAJE DE SUS BENEFICIARIOS — Indica quiénes son sus beneficiarios y el porcentaje de cada uno
+  7. NO ESTÁ CANCELANDO PÓLIZAS ACTUALES — Si tiene 1 o más pólizas activas, debe confirmar que NO está cancelando ninguna
+⛔ Si CUALQUIERA de estos puntos falta en el video, la solicitud NO puede proceder a emisión.
+   Marcar como pendiente y regresar al agente para que corrija el video.
+💡 Verificación del Talón de Pago (relacionado con punto 7):
+   Revisar el Talón de Pago para ver si el asegurado ya cuenta con una póliza activa de GNP.
+   Si tiene póliza(s) existente(s), esto es crítico para el punto 7 del video — el prospecto
+   DEBE haber mencionado que NO está cancelando sus pólizas actuales.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASO 1: EMISIÓN EN EL PORTAL GNP INTERMEDIARIOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+ACCESO AL PORTAL
+  URL: https://portalintermediarios.gnp.com.mx
+  Usuario: mario.pulido@prosperaseguros.mx
+  (Contraseña en 1Password: 'Portal GNP Intermediarios')
+  ⚠️  SOLO usar mario.pulido@prosperaseguros.mx — NUNCA jarvis@veseguro.com
+
+
+1.1 NAVEGACIÓN EN EL PORTAL GNP
+  1. Iniciar sesión en el portal
+  2. Clic en el menú hamburger (☰) esquina superior izquierda
+  3. Clic en 'Aplicaciones' en el menú lateral
+  4. Clic en 'Emite Vida CTE'
+  5. Esperar a que cargue la aplicación de emisión dentro del iframe
+
+
+1.2 SECCIÓN AGENTE — INGRESAR FOLIO
+  Campo: Folio
+  Valor: El folio de la dependencia correspondiente (ej. N0063319)
+  Campo: R.F.C. del Ejecutivo
+  Valor: PUFM861020CR7 (siempre el mismo)
+  Campo: CUA del Ejecutivo
+  Valor: 093793001 (se auto-llena)
+
+
+  ✅  CONSEJO: El folio SIEMPRE proviene del talón de descuento del cliente.
+     El folio determina la dependencia, subdependencia y contrato.
+
+
+1.3 SECCIÓN CONTRATANTE — BUSCAR O AGREGAR
+  PRIMERO siempre intenta BUSCAR:
+  1. Clic en botón 'Buscar' (naranja)
+  2. Seleccionar tipo de búsqueda: 'R.F.C.'
+  3. Ingresar RFC completo (13 caracteres con homoclave)
+  4. Clic en 'Buscar'
+
+
+  Si se encontró el contratante:
+  • Seleccionar el resultado correcto
+  • Verificar domicilio vs. solicitud/INE/comprobante domicilio — si es diferente, actualizar
+  • Verificar teléfono y email — actualizar si es necesario
+  • Clic 'Aceptar'
+
+
+  Si NO se encontró ('No se pudo realizar la operación'):
+  • Clic en 'Agregar'
+  • Llenar datos en el formulario de Alta (ver siguiente sección)
+
+
+1.4 ALTA DE CONTRATANTE (cuando no existe en sistema)
+  DATOS GENERALES:
+  • Tipo persona: Física
+  • Primer apellido: apellido paterno
+  • Segundo apellido: apellido materno
+  • Nombre(s): nombre(s) completo(s)
+  • R.F.C.: RFC con homoclave (13 caracteres)
+  • Fecha nacimiento: DD/MM/YYYY
+  • CURP: opcional pero recomendado
+  • Género: Masculino / Femenino
+  • Nacionalidad: mexicano (escribir 'mex' + ArrowDown + Enter)
+  • País de nacimiento: MEXICO (escribir 'mex' + ArrowDown + Enter)
+
+
+  DOMICILIOS:
+  • Tipo de domicilio: CASA
+  • Calle: calle exacta del INE o solicitud o comprobante de domicilio
+
+
+  • Número exterior: número exterior
+  • Número interior: interior (si aplica)
+  • Código Postal: 5 dígitos → auto-llena estado/municipio/colonia
+  ⚠️  Revisar que la colonia auto-llenada sea la correcta
+
+
+  MEDIOS DE CONTACTO:
+  • Tipo de teléfono: CELULAR
+  • Lada nacional: primeros 2 dígitos del teléfono (ej. 44 de 4481014325)
+  • Teléfono: últimos 8 dígitos (ej. 81014325)
+  • Email: correo electrónico del contratante
+
+
+  DATOS COMPLEMENTARIOS:
+  • Ocupación: ADMINISTRADOR DE EMPRESAS (siempre este valor)
+  • Estado civil: según solicitud
+  • Cargo gobierno: No
+
+
+  CLIC 'ACEPTAR' para guardar
+  ⚠️  NUNCA hacer clic en 'Cancelar' — borra todo sin confirmación
+
+
+  📌 TRUCO PARA DROPDOWNS ANGULAR MATERIAL:
+  Los dropdowns en el Portal GNP son campos 'mat-select' de Angular — no funcionan con clic normal.
+  Técnica correcta:
+  1. Hacer Tab hasta llegar al dropdown deseado
+  2. Presionar ArrowDown para abrir opciones
+  3. Escribir letras para filtrar (ej. 'mex', 'cas', 'cel')
+  4. ArrowDown hasta la opción correcta
+  5. Enter para seleccionar
+
+
+1.5 DATOS DEL LUGAR DE TRABAJO
+  Estos 4 campos son en cascada — deben seleccionarse en orden:
+  1. Empresa/Dependencia: ej. 'IMSS ACTIVOS' (escribir + ArrowDown + Enter)
+  2. Esperar 2 segundos a que cargue la siguiente lista
+  3. Filial/Subdependencia: ej. 'IMSS Activos SAN LUIS POTOSI'
+  4. Esperar 2 segundos
+  5. Contrato: el folio específico (ej. N0091583)
+  6. Esperar 2 segundos
+  7. Producto Vida: Vida Más Constante
+
+
+1.6 SECCIÓN SOLICITANTE
+  Pregunta: '¿El solicitante es distinto al contratante?'
+  • Seleccionar 'No' si el asegurado es el mismo que el contratante
+  • Seleccionar 'Sí' si el asegurado es diferente (ej. familiar)
+    → En ese caso, ingresar los datos del asegurado por separado
+  Pregunta sobre delincuencia organizada: No
+
+
+1.7 DECLARACIÓN DE SALUD
+  Pregunta 1 (enfermedades): No (salvo que se declare lo contrario)
+  Pregunta 2 (fumado últimos 12 meses): No (salvo que se declare)
+
+
+1.8 BENEFICIARIOS
+  Clic en 'Agregar beneficiario'
+  Para cada beneficiario:
+  • Apellido paterno, apellido materno, nombre(s)
+  • RFC (si disponible)
+  • Fecha de nacimiento
+  • Género
+  • Parentesco: DESDE LA PERSPECTIVA DEL CONTRATANTE
+    ⚠️  OJO: Si el agente escribe 'Hermana' en Paperform, puede ser 'Hijo/a'
+       en el sistema (el parentesco se da desde quien paga, no desde el asegurado)
+  • Suma Asegurada %: debe sumar 100% entre todos los beneficiarios
+  • Domicilio igual al asegurado: Sí (en la mayoría de los casos)
+
+
+  Para cada beneficiario, llenar también:
+  • Tipo domicilio: CASA
+  • Medios de contacto: CELULAR + teléfono
+  • Ocupación: ADMINISTRADOR DE EMPRESAS
+  • Estado civil: según corresponda
+
+
+1.9 COBRANZA
+  Campo: Clave de empleado
+  Valor: La matrícula del empleado (del talón de nómina)
+  Nota: Para ISSSTE, la matrícula es a 6 dígitos (agregar ceros a la izquierda)
+
+
+1.10 TARIFICAR Y EMITIR
+  1. Clic en 'Tarificar' (botón naranja)
+  2. Verificar que aparece 'Se tarificó correctamente'
+  3. Revisar: Prima anual, Número de pagos, Importe primer pago, Fecha de vigencia
+  4. Clic en 'Emitir'
+  5. Aparece diálogo: '¿Recuerda que para emitir la póliza...?' → Clic 'Sí'
+  6. ✅  SE GENERA EL NÚMERO DE PÓLIZA: 'Se ha generado su póliza No: XXXXXXXXXXXX'
+  7. Copiar el número de póliza (ej. 00000716414743)
+  8. Clic 'Aceptar'
+
+
+  INMEDIATAMENTE después de obtener el número de póliza:
+  → Actualizar el registro en ASTRO (Stacker) con el número de póliza
+  → Comenzar el Paso 2 (máximo 6 horas de plazo)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PASO 2: CORRECCIÓN DE DOCUMENTOS Y CARGA EN EXPEDIENTE DIGITAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+⏰  SLA: OBLIGATORIO completar en las siguientes 6 horas
+     Si no es posible → escalar con Mario de inmediato
+
+
+2.1 COMPLETAR LA SOLICITUD EN PDFFILLER
+  URL: https://www.pdffiller.com
+  Cuenta: VeSeguro Prospera
+  Carpeta: Compartida conmigo > Prospera
+
+
+  Pasos:
+  1. Buscar el documento por Número de Solicitud (ej. 1001-2026-S08-01)
+  2. Abrir el documento en modo edición
+  3. Verificar que TODOS los campos estén correctamente llenados
+  4. Prestar especial atención a:
+     • Fecha de llenado (DD/MM/YYYY)
+     • Folio del Ejecutivo y Folio de Solicitud
+     • Datos personales del contratante (exactos al INE)
+     • Identificación: escribir 'INE' y el número de credencial
+     • Firma del ejecutivo en las páginas que corresponda
+  5. Clic 'HECHO' para guardar
+  6. Descargar como PDF (ícono de descarga)
+  7. Guardar con nombre: [NumeroSolicitud].pdf (ej. 1001-2026-S08-01.pdf)
+
+
+  📌 PÁGINAS DE SOLICITUD QUE SE CARGAN AL EXPEDIENTE DIGITAL:
+  • Hoja 3: Con firma en 'aceptación de datos personales'
+  • Hoja 4: Con 1 firma y datos de INE
+  • Hoja 5: Página 5 completa
+  • Hoja 6: Con 1 firma
+
+
+2.2 PREPARAR DOCUMENTOS ANTES DE CARGAR
+  Tener listos en una carpeta local todos estos archivos:
+  ☐  INE 1 (frente) — PDF o JPG de buena calidad
+  ☐  INE 2 (vuelta) — PDF o JPG de buena calidad
+  ☐  Solicitud completa — PDF del PDFfiller
+  ☐  Talón de nómina — PDF escaneado
+  ☐  Carta de Instrucción — PDF de Airtable/ASTRO
+  ☐  Video declaración — MP4 (si aplica para el tipo de póliza)
+
+
+  ⚠️  CALIDAD MÍNIMA REQUERIDA:
+  • INE: Foto plana y legible. Se validan los 4 últimos dígitos.
+  • Solicitud: Texto legible, firma visible
+  • Talón: Número de empleado/matrícula claramente visible
+
+
+2.3 NAVEGAR AL EXPEDIENTE DIGITAL EN GNP
+  1. Ir a: https://portalintermediarios.gnp.com.mx
+  2. Iniciar sesión (mario.pulido@prosperaseguros.mx)
+  3. Menú lateral → 'Gestión de Negocios'
+  4. Submenú → 'Consulta de Pólizas'
+  5. Clic en el tab 'Gestión de documentos'
+  6. URL resultante: portalintermediarios.gnp.com.mx/home/pagina-iframe?tipo=aplicacion&menu=Documentación%20Asegurado
+
+
+2.4 BUSCAR LA PÓLIZA
+  1. En 'Criterios de búsqueda' seleccionar: 'Número de póliza'
+  2. Ingresar el número de póliza (15 dígitos con ceros: ej. 00000716402771)
+     ⚠️  Importante: incluir los ceros iniciales
+  3. Clic en 'Buscar' (lupa)
+  4. Verificar que aparezca la póliza correcta en 'Detalle de póliza'
+     Revisar: Nombre contratante, Fecha emisión, Estatus = VIGENTE
+
+
+  🚨 SI 'BUSCAR' ESTÁ DESHABILITADO:
+  • El campo de número de póliza puede estar vacío o con formato incorrecto
+  • Asegúrate de incluir todos los ceros del inicio
+  • Prueba primero sin ceros (solo el número de póliza como aparece en pantalla)
+  • Si persiste: cerrar sesión, volver a entrar, intentar de nuevo
+
+
+2.5 EXPANDIR LA PÓLIZA Y VER DOCUMENTOS
+  1. Hacer clic en el ícono '+' o ▶ a la izquierda de la fila de la póliza
+  2. Se expande la sección de documentos con las ranuras de carga
+  3. También hacer clic en 'Agregar' para mover la póliza a 'Lista de Pólizas'
+
+
+2.6 CARGAR LOS DOCUMENTOS
+  Para cada documento a cargar:
+  1. Identificar la ranura correcta (ver tabla más abajo)
+  2. Hacer clic en el ícono de subida de esa ranura
+  3. Seleccionar el 'Subtipo de documento' en el dropdown:
+     • INE → 'Credencial para votar'
+     • Solicitud → 'Solicitud de seguro' (o el subtipo correspondiente)
+     • Talón → seleccionar el tipo que corresponda
+  4. Hacer clic en el ícono de adjuntar (📎) o Choose File
+  5. Seleccionar el archivo desde tu computadora
+  6. Verificar que aparezca el nombre del archivo en la columna 'Archivo'
+  7. Repetir para cada documento
+
+
+  TABLA DE DOCUMENTOS POR RANURA (IMSS/ISSSTE/SEP DXN):
+
+
+  Ranura                    Documento a cargar          Subtipo
+  ─────────────────────────────────────────────────────────────────
+  * Identificaciones        INE frente + vuelta         Credencial para votar
+  * Solicitud               Solicitud completa PDF      Solicitud de seguro
+  Talón de nómina           Talón reciente              Comprobante de ingreso
+  Carta Instrucción         Carta de instrucción        Carta instrucción
+  Consentimiento Descuento  Consentimiento firmado      Consentimiento DXN
+
+
+  (*) = Obligatorio. Sin estos documentos la póliza NO se instala.
+
+
+  DOCUMENTOS ADICIONALES SEGÚN DEPENDENCIA:
+  • GOB CDMX: Formato de Reserva (llenado con tinta azul) + Consentimiento
+  • UAQ: Consentimiento especial (formato propio UAQ)
+  • Banco Calendarizado: Foto del número de tarjeta/CLABE en la solicitud
+
+
+2.7 ACTUALIZAR REGISTRO EN ASTRO (STACKER)
+  URL: https://astrov13.stackerhq.com
+  Usuario: jarvis@veseguro.com (link mágico al correo de Mario)
+
+
+  Pasos:
+  1. Buscar el registro por Número de Solicitud o Número de Póliza
+  2. Actualizar campos:
+     • Número de póliza (si no está)
+     • PDF Póliza: cargar el PDF descargado de GNP (formato 00000XXXXXXXXX.pdf)
+     • Documentos para CI: los archivos del Expediente Digital
+     • Documentos completos de CI: marcar cuando estén completos
+  3. Clic 'Save'
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ERRORES COMUNES Y CÓMO EVITARLOS
+(Lecciones del Video Paso 2 vs Paso 2.5)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+❌ ERROR 1: Editar el PDF de la solicitud manualmente después de generarlo
+   INCORRECTO: Abrir el PDF en Vista Previa y escribir datos de INE a mano
+   CORRECTO: Completar TODOS los campos en PDFfiller ANTES de descargar
+
+
+❌ ERROR 2: Fotos en ángulo o con sombras
+   INCORRECTO: Fotografiar documentos sobre un escritorio (salen torcidos)
+   CORRECTO: Usar CamScanner o escanear plano. El INE debe ser legible al 100%
+
+
+❌ ERROR 3: Parentesco incorrecto en beneficiarios
+   INCORRECTO: Copiar literalmente el parentesco del Paperform
+   CORRECTO: El parentesco en el Portal GNP es desde la perspectiva del CONTRATANTE
+   Ejemplo: Si el agente escribe 'Esposo' como beneficiario pero en el Portal GNP
+   el contratante es el padre, ese beneficiario es 'Hijo/a', no 'Esposo/a'
+
+
+❌ ERROR 4: Cargar documento incorrecto en la ranura equivocada
+   INCORRECTO: Subir foto del cliente en 'Talón de Cobertura'
+   CORRECTO: Revisar el nombre de cada ranura antes de cargar
+
+
+❌ ERROR 5: No incluir los ceros en el número de póliza
+   INCORRECTO: Buscar '716402771' en Expediente Digital
+   CORRECTO: Buscar '00000716402771' (15 dígitos con ceros iniciales)
+
+
+❌ ERROR 6: Dejar pasar más de 6 horas para el Expediente Digital
+   INCORRECTO: Emitir póliza y dejar el Expediente Digital para el día siguiente
+   CORRECTO: Completar Expediente Digital el mismo día, dentro de 6 horas
+
+
+❌ ERROR 7: Folio equivocado para la dependencia
+   INCORRECTO: Usar N0058293 para una póliza de IMSS Querétaro
+   CORRECTO: Verificar región en el talón → usar N0091583 para Querétaro
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TABLA RÁPIDA DE REFERENCIA — DEPENDENCIAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+IMSS ACTIVOS (DXN)
+  Dependencia:    00332 - IMSS ACTIVOS
+  Subdependencia: Según clave delegacional del talón
+  Contrato:       15 - IMSS Activos
+  Cobro:          Descuento vía nómina quincenal
+  Llave desc.:    Matrícula del empleado
+  Folios:         N0058293 / N0063319 / N0080385 / N0084530
+
+
+IMSS JUBILADOS (DXN)
+  Dependencia:    IMSS JUBILADOS
+  Subdependencia: Según delegación
+  Contrato:       16 - VIDA MAS IMSS Jubilados
+  Cobro:          Descuento vía nómina mensual
+  Folios:         Consultar talón
+
+
+ISSSTE (DXN)
+  Dependencia:    00180 - ISSSTE
+  Subdependencia: 00133 - ISSSTE
+  Contrato:       2 - ISSSTE
+  Cobro:          Descuento vía nómina quincenal
+  Llave desc.:    Número de empleado a 6 dígitos (agregar ceros a la izquierda)
+  Código GNP:     83
+  Folio:          N0051765
+
+
+GOB CDMX (DXN)
+  Dependencia:    00390 - GOBIERNO DE LA CIUDAD DE MEXICO
+  Subdependencia: 00412 - GOBIERNO DE LA CIUDAD DE MEXICO
+  Contrato:       240 - GOBCDMX
+  Cobro:          Descuento vía nómina quincenal
+  Llave desc.:    Número de empleado
+  Código GNP:     GNP-SEG
+  Folio:          N0073208
+  Docs extra:     Formato de Reserva (tinta azul) + Consentimiento de Descuento
+
+
+SEP (DXN)
+  Dependencia:    SECRETARIA DE EDUCACIÓN PUBLICA
+  Subdependencia: Validar CENTRO DE TRABAJO en el talón
+     AFSEDF (Clave presupuestal 11)
+     SEP Central (Clave presupuestal 11)
+     SEP Media Superior
+  Cobro:          Descuento vía nómina quincenal
+  Llave desc.:    RFC a 13 dígitos
+  Código GNP:     G1
+  Folios correctos: N0064866 / N0064865 / N0064867 (los más recientes)
+  ⚠️  Folios INCORRECTOS que NO deben usarse: N0058292, N0082480, N0083013
+
+
+UAQ (DXN)
+  Dependencia:    0167 - UNIVERSIDAD AUTÓNOMA DE QUERÉTARO
+  Subdependencia: 00201 - UNIVERSIDAD AUTÓNOMA DE QUERÉTARO
+  Contrato:       23 - UAQ NOMINA
+  Folio:          N0091588 - SM UAQ PROSPERA
+  Cobro:          Descuento vía nómina quincenal
+  Llave desc.:    RFC a 10 dígitos (sin homoclave)
+  Código desc.:   341
+  Docs extra:     Consentimiento especial formato UAQ (obligatorio)
+
+
+BANCO CALENDARIZADO QUINCENAL (Familiares/Empresarial/GEM/Guardia Nacional)
+  Cobro:          Bancario quincenal (no DXN)
+  Contrato:       20200001 - BANCO CALENDARIZADO QUINCENAL
+  Conducto cobro: CLABE interbancaria (18 dígitos) — RECOMENDADA
+                  O: Tarjeta débito/crédito (16 dígitos) o AMEX (15 dígitos)
+  Vigencia:       Se posfecha según calendario publicado
+  Docs extra:     Capturar 4 últimos dígitos bancarios en la solicitud
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TARJETA DE REFERENCIA RÁPIDA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+DATOS FIJOS (siempre iguales):
+  • Portal: https://portalintermediarios.gnp.com.mx
+  • Usuario emisión: mario.pulido@prosperaseguros.mx
+  • CUA: 0093793001
+  • RFC Ejecutivo: PUFM861020CR7
+  • Ocupación en el Portal GNP: ADMINISTRADOR DE EMPRESAS
+  • SLA Expediente Digital: 6 horas
+
+
+SECUENCIA RÁPIDA:
+  Talón → Folio correcto → Portal → Login → Emite Vida CTE
+  → Folio + RFC → Buscar/Agregar contratante → Lugar de trabajo
+  → Solicitante → Salud → Beneficiarios → Cobranza (matrícula)
+  → Tarificar → Emitir → Copiar # de póliza → Actualizar ASTRO
+  → PDFfiller (completar solicitud) → GNP Expediente Digital → Cargar docs
+
+
+SEÑALES DE ALARMA:
+  🚨 Folio no existe en sistema → verifica en esta guía
+  🚨 'Buscar' deshabilitado → incluir ceros iniciales
+  🚨 Error al tarificar → revisar estructura (dependencia/subdependencia/contrato)
+  🚨 Póliza no se instala → documentos incompletos en Expediente Digital
+
+
+ESCALACIÓN:
+  Cualquier duda o error → mensaje a Mario en Telegram o Discord
+  Emergencias (6hr SLA en riesgo) → llamar directamente
+
+
+Versión 1.0 — Creado por Jarvis | Basado en videos de capacitación de Mario y Lenny | Febrero 2026
+
+
+
+
+GALERÍA DE CAPTURAS DE PANTALLA
+
+
+
+
+Pantalla inicial del Portal GNP Intermediarios — sección Emite Vida CTE
+
+
+Póliza generada exitosamente
+
+
+Expediente Digital — Búsqueda de póliza
+
+
+Expediente Digital — Sección de documentos
