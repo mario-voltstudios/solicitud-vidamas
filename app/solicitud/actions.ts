@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { appendToSheet } from '@/lib/google-sheets'
 import { createAirtableRecord } from '@/lib/airtable'
 import { backupFilesToDrive } from '@/lib/google-drive'
+import { getMissingRequiredDocs, getUploadedDocs } from '@/lib/dependencia-rules'
 
 const INEDataSchema = z.object({
   nombres: z.string().describe('First name(s) of the person'),
@@ -169,10 +170,32 @@ export async function submitSolicitud(formData: FormData) {
 
   const supabase = createServerClient()
 
+  const missingRequiredDocs = getMissingRequiredDocs(formData)
+  const intakeStatus = missingRequiredDocs.length > 0 ? 'pending_docs' : 'pendiente'
+
   // Re-generate folio at submit time to avoid duplicates
   // (folio from Step 1 was generated before record existed)
   let finalFolio = formData.folio
   if (formData.clave_agente && formData.year && formData.week_number) {
+    if (formData.contratante_rfc) {
+      const { data: existingDuplicate } = await supabase
+        .from('solicitudes')
+        .select('id, folio, status')
+        .eq('clave_agente', formData.clave_agente)
+        .eq('contratante_rfc', formData.contratante_rfc)
+        .eq('week_number', formData.week_number)
+        .eq('year', formData.year)
+        .limit(1)
+        .maybeSingle()
+
+      if (existingDuplicate) {
+        return {
+          success: false,
+          error: `Ya existe una solicitud similar para este agente y RFC en la semana actual (${existingDuplicate.folio}).`,
+        }
+      }
+    }
+
     finalFolio = await generateFolio(formData.clave_agente, {
       year: formData.year,
       week_number: formData.week_number,
@@ -182,7 +205,7 @@ export async function submitSolicitud(formData: FormData) {
   const payload = {
     folio: finalFolio,
     clave_agente: formData.clave_agente,
-    status: 'pendiente',
+    status: intakeStatus,
     // contratante
     contratante_nombres: formData.contratante_nombres || null,
     contratante_ap_paterno: formData.contratante_ap_paterno || null,
@@ -229,6 +252,10 @@ export async function submitSolicitud(formData: FormData) {
     prima_base: formData.prima_base ? parseFloat(formData.prima_base) : null,
     prima_adicional: formData.prima_adicional ? parseFloat(formData.prima_adicional) : null,
     suma_asegurada: formData.suma_asegurada ? parseFloat(formData.suma_asegurada) : null,
+    base_calculo: formData.base_calculo || null,
+    nombre_agente: formData.nombre_agente || null,
+    week_number: formData.week_number || null,
+    year: formData.year || null,
     // beneficiarios
     beneficiarios: formData.beneficiarios || [],
     // firma
@@ -248,6 +275,30 @@ export async function submitSolicitud(formData: FormData) {
     return { success: false, error: error.message }
   }
 
+  const docs = getUploadedDocs(formData)
+  const documentRows = Object.entries(docs)
+    .filter(([, storagePath]) => Boolean(storagePath))
+    .map(([docType, storagePath]) => ({
+      solicitud_id: data.id,
+      doc_type: docType,
+      storage_path: storagePath,
+      upload_state: 'uploaded',
+      upload_at: new Date().toISOString(),
+      ocr_state: ['ine_frente', 'ine_reverso', 'talon'].includes(docType) ? 'pending' : 'skipped',
+      backup_state: 'pending',
+      created_by: formData.clave_agente || 'wizard',
+    }))
+
+  if (documentRows.length > 0) {
+    const { error: docsError } = await supabase
+      .from('solicitud_documentos')
+      .insert(documentRows)
+
+    if (docsError) {
+      console.error('Document tracking insert error:', docsError)
+    }
+  }
+
   // ── Async backups (fire-and-forget, do NOT await) ─────────────────────────
   // Use the final folio (server-generated) for all backups
   const backupData = { ...formData, folio: data.folio }
@@ -263,9 +314,10 @@ export async function submitSolicitud(formData: FormData) {
   )
 
   // 3. Google Drive file backup — collect all docs_ fields from formData
-  const docs: Record<string, string> = {}
+  const driveDocs: Record<string, string> = {}
   const docKeys = [
     'ine_frente', 'ine_reverso', 'talon',
+    'carta_instruccion', 'constancia_derechohabiente', 'clave_unica_pago',
     'solicitud_p1', 'solicitud_p2', 'solicitud_p3',
     'solicitud_p4', 'solicitud_p5', 'solicitud_p6',
     'video',
@@ -274,14 +326,20 @@ export async function submitSolicitud(formData: FormData) {
   const fd = formData as any
   for (const key of docKeys) {
     const path = fd[`docs_${key}`]
-    if (path) docs[key] = path
+    if (path) driveDocs[key] = path
   }
-  if (Object.keys(docs).length > 0) {
-    backupFilesToDrive(data.folio, docs).catch((err) =>
+  if (Object.keys(driveDocs).length > 0) {
+    backupFilesToDrive(data.folio, driveDocs).catch((err) =>
       console.error('[Backup] Google Drive failed:', err)
     )
   }
   // ─────────────────────────────────────────────────────────────────────────
 
-  return { success: true, id: data.id, folio: data.folio }
+  return {
+    success: true,
+    id: data.id,
+    folio: data.folio,
+    status: intakeStatus,
+    missingRequiredDocs: missingRequiredDocs.map((doc) => doc.title),
+  }
 }
