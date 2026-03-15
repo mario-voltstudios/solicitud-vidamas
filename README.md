@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Solicitud VidaMás — Intake Form
 
-## Getting Started
+Next.js wizard for capturing VidaMás insurance applications (solicitudes). Submits to Supabase with fire-and-forget backups to Google Sheets, Airtable, and Google Drive.
 
-First, run the development server:
+---
+
+## Domain Model
+
+See **[DOMAIN_MODEL.md](./DOMAIN_MODEL.md)** for the full canonical reference.
+
+**TL;DR — Three essential entities per solicitud:**
+
+1. **Contratante** — the payer (exactly 1)  
+2. **Asegurado** — the insured/applicant (exactly 1)  
+3. **Beneficiarios** — death beneficiaries (1+, must sum to 100%)
+
+The TypeScript types and validation helpers live in `lib/types.ts`. Always validate with `validateSolicitudEntities(formData)` before submitting.
+
+---
+
+## Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Key Files
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| File | Purpose |
+|---|---|
+| `lib/types.ts` | Domain types, entity extractors, validation helpers |
+| `lib/supabase.ts` | Supabase client setup |
+| `app/solicitud/actions.ts` | Server actions: submit, validate agent, OCR |
+| `components/wizard/` | One component per wizard step |
+| `sql/` | Database migration files (apply in order) |
+| `DOMAIN_MODEL.md` | Canonical domain model reference |
+| `GAP_ANALYSIS.md` | Airtable ↔ Supabase gap analysis |
 
-## Learn More
+### Database Migrations
 
-To learn more about Next.js, take a look at the following resources:
+Apply these SQL files to Supabase **in order**:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+sql/001_solicitudes_normalized.sql   — beneficiarios normalization + back-fill
+sql/002_poliza_reconciliation.sql    — polizas + reconciliation_checks tables
+sql/003_recibos_lifecycle.sql        — recibos lifecycle model + views
+sql/004_solicitud_documentos.sql     — document tracking table (NEW)
+sql/005_solicitud_status_history.sql — append-only status audit log (NEW)
+sql/006_agentes_schema.sql           — agentes table formalization (NEW)
+sql/007_solicitudes_minor_gaps.sql   — minor column gaps: base_calculo, nombre_agente, week/year (NEW)
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See [DOMAIN_MODEL.md](./DOMAIN_MODEL.md#migration-files) for the full schema overview.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploy via [Vercel](https://vercel.com). Required environment variables:
+
+```
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+SUPABASE_SECRET_KEY
+GOOGLE_SERVICE_ACCOUNT_JSON
+AIRTABLE_TOKEN
+AIRTABLE_BASE_ID
+ANTHROPIC_API_KEY
+```
