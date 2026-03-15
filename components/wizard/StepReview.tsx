@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { submitSolicitud } from '@/app/solicitud/actions'
 import { FormData } from '@/lib/types'
-import { getMissingRequiredDocs } from '@/lib/dependencia-rules'
+import { deriveIntakeStatus } from '@/lib/intake-status'
 
 interface StepReviewProps {
   formData: FormData
@@ -157,8 +157,9 @@ export default function StepReview({ formData, onBack, onGoToStep }: StepReviewP
   }
 
   const totalPrima = (parseFloat(formData.prima_base || '0') + parseFloat(formData.prima_adicional || '0')).toFixed(2)
-  const missingRequiredDocs = getMissingRequiredDocs(formData)
-  const willSubmitAsPendingDocs = missingRequiredDocs.length > 0
+  const intake = deriveIntakeStatus(formData)
+  const willSubmitAsPendingDocs = intake.status === 'pending_docs'
+  const willSubmitAsPendingVerification = intake.status === 'pending_verification'
 
   if (submitted) {
     return (
@@ -172,7 +173,9 @@ export default function StepReview({ formData, onBack, onGoToStep }: StepReviewP
             <p className="text-gray-600 mt-1">
               {willSubmitAsPendingDocs
                 ? 'La solicitud quedó guardada como pendiente de documentos para seguimiento.'
-                : 'La solicitud fue guardada exitosamente.'}
+                : willSubmitAsPendingVerification
+                  ? 'La solicitud quedó guardada como pendiente de verificación.'
+                  : 'La solicitud fue guardada exitosamente.'}
             </p>
           </div>
         </div>
@@ -285,12 +288,26 @@ export default function StepReview({ formData, onBack, onGoToStep }: StepReviewP
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
           <p className="text-amber-900 text-sm font-medium">Se enviará como pendiente de documentos</p>
           <ul className="text-xs text-amber-800 mt-2 space-y-1 list-disc pl-4">
-            {missingRequiredDocs.map((doc) => (
-              <li key={doc.key}>{doc.title}</li>
+            {intake.missingDocs.map((doc) => (
+              <li key={doc}>{doc}</li>
             ))}
           </ul>
           <p className="text-xs text-amber-700 mt-2">
             Esto no bloquea la solicitud. Quedará registrada para seguimiento y corrección.
+          </p>
+        </div>
+      )}
+
+      {willSubmitAsPendingVerification && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+          <p className="text-blue-900 text-sm font-medium">Se enviará como pendiente de verificación</p>
+          <ul className="text-xs text-blue-800 mt-2 space-y-1 list-disc pl-4">
+            {intake.missingVerification.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <p className="text-xs text-blue-700 mt-2">
+            La solicitud puede entrar, pero no estará lista para emisión hasta completar la verificación.
           </p>
         </div>
       )}

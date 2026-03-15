@@ -8,7 +8,8 @@ import { z } from 'zod'
 import { appendToSheet } from '@/lib/google-sheets'
 import { createAirtableRecord } from '@/lib/airtable'
 import { backupFilesToDrive } from '@/lib/google-drive'
-import { getMissingRequiredDocs, getUploadedDocs } from '@/lib/dependencia-rules'
+import { getUploadedDocs } from '@/lib/dependencia-rules'
+import { deriveIntakeStatus } from '@/lib/intake-status'
 
 const INEDataSchema = z.object({
   nombres: z.string().describe('First name(s) of the person'),
@@ -170,8 +171,8 @@ export async function submitSolicitud(formData: FormData) {
 
   const supabase = createServerClient()
 
-  const missingRequiredDocs = getMissingRequiredDocs(formData)
-  const intakeStatus = missingRequiredDocs.length > 0 ? 'pending_docs' : 'pendiente'
+  const intake = deriveIntakeStatus(formData)
+  const intakeStatus = intake.status
 
   // Re-generate folio at submit time to avoid duplicates
   // (folio from Step 1 was generated before record existed)
@@ -340,6 +341,7 @@ export async function submitSolicitud(formData: FormData) {
     id: data.id,
     folio: data.folio,
     status: intakeStatus,
-    missingRequiredDocs: missingRequiredDocs.map((doc) => doc.title),
+    missingRequiredDocs: intake.missingDocs,
+    missingVerification: intake.missingVerification,
   }
 }
