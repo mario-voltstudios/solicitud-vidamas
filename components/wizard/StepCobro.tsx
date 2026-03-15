@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormData, DEPENDENCIAS } from '@/lib/types'
+import { getDependenciaRequirements } from '@/lib/dependencia-rules'
 
 interface StepCobroProps {
   formData: FormData
@@ -80,6 +81,7 @@ export default function StepCobro({ formData, setFormData, onNext, onBack }: Ste
 
   const inputClass = "h-11 text-base"
   const errorClass = "text-red-500 text-xs mt-1"
+  const dependenciaRequirements = getDependenciaRequirements(formData)
 
   return (
     <div className="space-y-4">
@@ -191,18 +193,17 @@ export default function StepCobro({ formData, setFormData, onNext, onBack }: Ste
             {/* Docs needed for nómina */}
             {formData.contratante_dependencia && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                <p className="text-sm font-medium text-amber-800 mb-2">📋 Documentos necesarios:</p>
+                <p className="text-sm font-medium text-amber-800 mb-2">📋 Documentos para este caso</p>
                 <ul className="text-xs text-amber-700 space-y-1">
-                  <li>• INE del contratante (frente y reverso)</li>
-                  <li>• Talón de pago más reciente</li>
-                  {['IMSS', 'ISSSTE'].includes(formData.contratante_dependencia) && (
-                    <li>• Constancia de derechohabiente</li>
-                  )}
-                  {formData.contratante_dependencia === 'SEP' && (
-                    <li>• Clave Única de Pago</li>
-                  )}
-                  <li>• Solicitud firmada (páginas 1-6)</li>
+                  {dependenciaRequirements.map((doc) => (
+                    <li key={doc.key}>
+                      • {doc.title}{doc.required ? '' : ' (seguimiento si falta)'}
+                    </li>
+                  ))}
                 </ul>
+                <p className="text-[11px] text-amber-700 mt-2">
+                  Solo pedimos lo esencial. Si falta algo no crítico, la solicitud puede seguir como pendiente de documentos.
+                </p>
               </div>
             )}
           </CardContent>

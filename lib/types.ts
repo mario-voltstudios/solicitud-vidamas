@@ -165,6 +165,16 @@ export interface FormData {
   docs_ine_frente?: string
   docs_ine_reverso?: string
   docs_talon?: string
+  docs_carta_instruccion?: string
+  docs_constancia_derechohabiente?: string
+  docs_clave_unica_pago?: string
+  docs_solicitud_p1?: string
+  docs_solicitud_p2?: string
+  docs_solicitud_p3?: string
+  docs_solicitud_p4?: string
+  docs_solicitud_p5?: string
+  docs_solicitud_p6?: string
+  docs_video?: string
 
   // Step 8: Firma
   firma_base64?: string

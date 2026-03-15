@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { submitSolicitud } from '@/app/solicitud/actions'
 import { FormData } from '@/lib/types'
+import { getMissingRequiredDocs } from '@/lib/dependencia-rules'
 
 interface StepReviewProps {
   formData: FormData
@@ -155,6 +156,10 @@ export default function StepReview({ formData, onBack, onGoToStep }: StepReviewP
     }
   }
 
+  const totalPrima = (parseFloat(formData.prima_base || '0') + parseFloat(formData.prima_adicional || '0')).toFixed(2)
+  const missingRequiredDocs = getMissingRequiredDocs(formData)
+  const willSubmitAsPendingDocs = missingRequiredDocs.length > 0
+
   if (submitted) {
     return (
       <div className="space-y-6 text-center">
@@ -164,7 +169,11 @@ export default function StepReview({ formData, onBack, onGoToStep }: StepReviewP
           </div>
           <div>
             <h2 className="text-2xl font-bold text-green-600">¡Solicitud Enviada!</h2>
-            <p className="text-gray-600 mt-1">La solicitud fue guardada exitosamente</p>
+            <p className="text-gray-600 mt-1">
+              {willSubmitAsPendingDocs
+                ? 'La solicitud quedó guardada como pendiente de documentos para seguimiento.'
+                : 'La solicitud fue guardada exitosamente.'}
+            </p>
           </div>
         </div>
 
@@ -190,8 +199,6 @@ export default function StepReview({ formData, onBack, onGoToStep }: StepReviewP
       </div>
     )
   }
-
-  const totalPrima = (parseFloat(formData.prima_base || '0') + parseFloat(formData.prima_adicional || '0')).toFixed(2)
 
   return (
     <div className="space-y-4">
@@ -273,6 +280,20 @@ export default function StepReview({ formData, onBack, onGoToStep }: StepReviewP
           </div>
         ))}
       </Section>
+
+      {willSubmitAsPendingDocs && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+          <p className="text-amber-900 text-sm font-medium">Se enviará como pendiente de documentos</p>
+          <ul className="text-xs text-amber-800 mt-2 space-y-1 list-disc pl-4">
+            {missingRequiredDocs.map((doc) => (
+              <li key={doc.key}>{doc.title}</li>
+            ))}
+          </ul>
+          <p className="text-xs text-amber-700 mt-2">
+            Esto no bloquea la solicitud. Quedará registrada para seguimiento y corrección.
+          </p>
+        </div>
+      )}
 
       {/* Signature */}
       <Card>
