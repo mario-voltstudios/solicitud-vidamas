@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormData, DEPENDENCIAS } from '@/lib/types'
 import { getDependenciaRequirements } from '@/lib/dependencia-rules'
+import { matchFoliosByDependencia } from '@/lib/release-folder-rules'
 
 interface StepCobroProps {
   formData: FormData
@@ -82,6 +83,7 @@ export default function StepCobro({ formData, setFormData, onNext, onBack }: Ste
   const inputClass = "h-11 text-base"
   const errorClass = "text-red-500 text-xs mt-1"
   const dependenciaRequirements = getDependenciaRequirements(formData)
+  const folioCandidates = matchFoliosByDependencia(formData.contratante_dependencia)
 
   return (
     <div className="space-y-4">
@@ -181,13 +183,24 @@ export default function StepCobro({ formData, setFormData, onNext, onBack }: Ste
             </div>
 
             <div>
-              <Label>Folio de Contrato</Label>
+              <Label>Folio de Contrato / Folio GNP</Label>
               <Input
                 placeholder="Folio de contrato GNP"
                 value={formData.folio_contrato}
                 onChange={(e) => update('folio_contrato', e.target.value)}
                 className={inputClass}
               />
+              {folioCandidates.length > 0 && (
+                <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-xs font-medium text-blue-900">Sugerencia desde carpetas de liberación</p>
+                  <p className="text-xs text-blue-800 mt-1">
+                    Folio(s) candidato(s): {folioCandidates.flatMap((item) => item.folios).join(', ')}
+                  </p>
+                  <p className="text-[11px] text-blue-700 mt-1">
+                    Úsalo como guía inicial. La versión final debe amarrarse al talón/OCR y a la regla exacta de subdependencia.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Docs needed for nómina */}
