@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="91" failures="0" errors="0" time="0.397">
+  <testsuite name="normalizeDependencia" errors="0" failures="0" skipped="0" timestamp="2026-03-16T18:35:32" time="0.114" tests="39">
+    <testcase classname="normalizeDependencia returns IMSS_ACTIVOS for &quot;IMSS&quot;" name="normalizeDependencia returns IMSS_ACTIVOS for &quot;IMSS&quot;" time="0.002">
+    </testcase>
+    <testcase classname="normalizeDependencia returns IMSS_JUBILADOS for &quot;IMSS JUBILADOS&quot;" name="normalizeDependencia returns IMSS_JUBILADOS for &quot;IMSS JUBILADOS&quot;" time="0.001">
+    </testcase>
+    <testcase classname="normalizeDependencia returns IMSS_JUBILADOS for &quot;IMSS JUB.&quot;" name="normalizeDependencia returns IMSS_JUBILADOS for &quot;IMSS JUB.&quot;" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia returns ISSSTE for &quot;ISSSTE&quot;" name="normalizeDependencia returns ISSSTE for &quot;ISSSTE&quot;" time="0.001">
+    </testcase>
+    <testcase classname="normalizeDependencia returns SEP for &quot;SEP&quot;" name="normalizeDependencia returns SEP for &quot;SEP&quot;" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia returns GOB_CDMX for &quot;GOBIERNO CDMX&quot;" name="normalizeDependencia returns GOB_CDMX for &quot;GOBIERNO CDMX&quot;" time="0.001">
+    </testcase>
+    <testcase classname="normalizeDependencia returns GOB_CDMX for &quot;CIUDAD DE MEXICO&quot;" name="normalizeDependencia returns GOB_CDMX for &quot;CIUDAD DE MEXICO&quot;" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia returns GOBIERNO for generic &quot;GOBIERNO ESTATAL&quot;" name="normalizeDependencia returns GOBIERNO for generic &quot;GOBIERNO ESTATAL&quot;" time="0.001">
+    </testcase>
+    <testcase classname="normalizeDependencia returns OTRA for unknown" name="normalizeDependencia returns OTRA for unknown" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia returns SIN_DEPENDENCIA for empty string" name="normalizeDependencia returns SIN_DEPENDENCIA for empty string" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia returns SIN_DEPENDENCIA for null" name="normalizeDependencia returns SIN_DEPENDENCIA for null" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia is case-insensitive" name="normalizeDependencia is case-insensitive" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina includes ine_frente" name="getDependenciaRequirements — IMSS Activos + nómina includes ine_frente" time="0.001">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina includes ine_reverso" name="getDependenciaRequirements — IMSS Activos + nómina includes ine_reverso" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina includes talon (nomina)" name="getDependenciaRequirements — IMSS Activos + nómina includes talon (nomina)" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina includes solicitud_p1" name="getDependenciaRequirements — IMSS Activos + nómina includes solicitud_p1" time="0.001">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina includes solicitud_p2" name="getDependenciaRequirements — IMSS Activos + nómina includes solicitud_p2" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina includes solicitud_p3" name="getDependenciaRequirements — IMSS Activos + nómina includes solicitud_p3" time="0.005">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina does NOT include carta_instruccion" name="getDependenciaRequirements — IMSS Activos + nómina does NOT include carta_instruccion" time="0.001">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina does NOT include constancia_derechohabiente" name="getDependenciaRequirements — IMSS Activos + nómina does NOT include constancia_derechohabiente" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina does NOT include clave_unica_pago" name="getDependenciaRequirements — IMSS Activos + nómina does NOT include clave_unica_pago" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina all signature docs are required" name="getDependenciaRequirements — IMSS Activos + nómina all signature docs are required" time="0.001">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Jubilados + nómina includes carta_instruccion (required)" name="getDependenciaRequirements — IMSS Jubilados + nómina includes carta_instruccion (required)" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Jubilados + nómina includes talon" name="getDependenciaRequirements — IMSS Jubilados + nómina includes talon" time="0.001">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Jubilados + nómina includes signature docs p1-p3" name="getDependenciaRequirements — IMSS Jubilados + nómina includes signature docs p1-p3" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — ISSSTE + nómina includes constancia_derechohabiente (optional)" name="getDependenciaRequirements — ISSSTE + nómina includes constancia_derechohabiente (optional)" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — ISSSTE + nómina does NOT include carta_instruccion" name="getDependenciaRequirements — ISSSTE + nómina does NOT include carta_instruccion" time="0.001">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — SEP + nómina includes clave_unica_pago (optional)" name="getDependenciaRequirements — SEP + nómina includes clave_unica_pago (optional)" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — SEP + nómina does NOT include carta_instruccion" name="getDependenciaRequirements — SEP + nómina does NOT include carta_instruccion" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — SEP + nómina does NOT include constancia_derechohabiente" name="getDependenciaRequirements — SEP + nómina does NOT include constancia_derechohabiente" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — Gobierno CDMX + nómina includes signature docs" name="getDependenciaRequirements — Gobierno CDMX + nómina includes signature docs" time="0.001">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — Gobierno CDMX + nómina does NOT include carta_instruccion" name="getDependenciaRequirements — Gobierno CDMX + nómina does NOT include carta_instruccion" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — CLABE payment (no nómina) does NOT include talon when forma_cobro=clabe" name="getDependenciaRequirements — CLABE payment (no nómina) does NOT include talon when forma_cobro=clabe" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — CLABE payment (no nómina) includes ine_frente and ine_reverso" name="getDependenciaRequirements — CLABE payment (no nómina) includes ine_frente and ine_reverso" time="0">
+    </testcase>
+    <testcase classname="getMissingRequiredDocs returns empty when all required docs are present for IMSS+nómina" name="getMissingRequiredDocs returns empty when all required docs are present for IMSS+nómina" time="0.001">
+    </testcase>
+    <testcase classname="getMissingRequiredDocs returns talon as missing when forma_cobro=nomina and talon not uploaded" name="getMissingRequiredDocs returns talon as missing when forma_cobro=nomina and talon not uploaded" time="0">
+    </testcase>
+    <testcase classname="getMissingRequiredDocs returns carta_instruccion as missing for IMSS Jubilados without it" name="getMissingRequiredDocs returns carta_instruccion as missing for IMSS Jubilados without it" time="0.001">
+    </testcase>
+    <testcase classname="getMissingRequiredDocs does NOT flag clave_unica_pago as missing for SEP (it is optional)" name="getMissingRequiredDocs does NOT flag clave_unica_pago as missing for SEP (it is optional)" time="0">
+    </testcase>
+    <testcase classname="getMissingRequiredDocs does NOT flag constancia_derechohabiente as missing for ISSSTE (it is optional)" name="getMissingRequiredDocs does NOT flag constancia_derechohabiente as missing for ISSSTE (it is optional)" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="deriveIntakeStatus — IMSS Activos + nómina" errors="0" failures="0" skipped="0" timestamp="2026-03-16T18:35:32" time="0.022" tests="8">
+    <testcase classname="deriveIntakeStatus — IMSS Activos + nómina returns ready_for_emision when all required docs uploaded" name="deriveIntakeStatus — IMSS Activos + nómina returns ready_for_emision when all required docs uploaded" time="0.001">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — IMSS Activos + nómina returns pending_verification when docs OK but video missing" name="deriveIntakeStatus — IMSS Activos + nómina returns pending_verification when docs OK but video missing" time="0">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — IMSS Activos + nómina returns pending_docs when talon is missing" name="deriveIntakeStatus — IMSS Activos + nómina returns pending_docs when talon is missing" time="0">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — IMSS Activos + nómina returns pending_docs when INE docs are missing" name="deriveIntakeStatus — IMSS Activos + nómina returns pending_docs when INE docs are missing" time="0">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — IMSS Jubilados returns pending_docs when carta_instruccion is missing" name="deriveIntakeStatus — IMSS Jubilados returns pending_docs when carta_instruccion is missing" time="0">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — IMSS Jubilados returns ready_for_emision when carta_instruccion is present + video" name="deriveIntakeStatus — IMSS Jubilados returns ready_for_emision when carta_instruccion is present + video" time="0">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — CLABE payment returns pending_docs when INE missing (no talon needed for CLABE)" name="deriveIntakeStatus — CLABE payment returns pending_docs when INE missing (no talon needed for CLABE)" time="0.001">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — CLABE payment does NOT list talon as missing for CLABE payment" name="deriveIntakeStatus — CLABE payment does NOT list talon as missing for CLABE payment" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="validateBeneficiarios" errors="0" failures="0" skipped="0" timestamp="2026-03-16T18:35:32" time="0.026" tests="29">
+    <testcase classname="validateBeneficiarios passes for single beneficiario at 100%" name="validateBeneficiarios passes for single beneficiario at 100%" time="0.001">
+    </testcase>
+    <testcase classname="validateBeneficiarios passes for two beneficiarios summing to 100%" name="validateBeneficiarios passes for two beneficiarios summing to 100%" time="0">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when beneficiarios is empty" name="validateBeneficiarios fails when beneficiarios is empty" time="0.001">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when sum &lt; 100" name="validateBeneficiarios fails when sum &lt; 100" time="0">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when sum &gt; 100" name="validateBeneficiarios fails when sum &gt; 100" time="0">
+    </testcase>
+    <testcase classname="validateBeneficiarios allows float drift (e.g. 33.33+33.33+33.34)" name="validateBeneficiarios allows float drift (e.g. 33.33+33.33+33.34)" time="0">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when porcentaje is 0" name="validateBeneficiarios fails when porcentaje is 0" time="0">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when beneficiario missing nombres" name="validateBeneficiarios fails when beneficiario missing nombres" time="0.001">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when beneficiario missing parentesco" name="validateBeneficiarios fails when beneficiario missing parentesco" time="0">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when beneficiario missing fecha_nac" name="validateBeneficiarios fails when beneficiario missing fecha_nac" time="0">
+    </testcase>
+    <testcase classname="validateBeneficiarios allows multiple beneficiarios with non-round sums at 100" name="validateBeneficiarios allows multiple beneficiarios with non-round sums at 100" time="0">
+    </testcase>
+    <testcase classname="validateContratante passes for fully populated contratante" name="validateContratante passes for fully populated contratante" time="0">
+    </testcase>
+    <testcase classname="validateContratante fails when nombres is empty" name="validateContratante fails when nombres is empty" time="0">
+    </testcase>
+    <testcase classname="validateContratante fails when email is empty" name="validateContratante fails when email is empty" time="0">
+    </testcase>
+    <testcase classname="validateContratante fails when dependencia is empty" name="validateContratante fails when dependencia is empty" time="0">
+    </testcase>
+    <testcase classname="validateAsegurado — misma_persona=true passes without asegurado fields when misma_persona=true" name="validateAsegurado — misma_persona=true passes without asegurado fields when misma_persona=true" time="0">
+    </testcase>
+    <testcase classname="validateAsegurado — misma_persona=false fails when asegurado_nombres is empty" name="validateAsegurado — misma_persona=false fails when asegurado_nombres is empty" time="0">
+    </testcase>
+    <testcase classname="validateAsegurado — misma_persona=false passes when all asegurado fields are provided" name="validateAsegurado — misma_persona=false passes when all asegurado fields are provided" time="0.001">
+    </testcase>
+    <testcase classname="extractAsegurado — misma_persona mirror mirrors contratante fields when misma_persona=true" name="extractAsegurado — misma_persona mirror mirrors contratante fields when misma_persona=true" time="0">
+    </testcase>
+    <testcase classname="extractAsegurado — misma_persona mirror uses asegurado fields when misma_persona=false" name="extractAsegurado — misma_persona mirror uses asegurado fields when misma_persona=false" time="0">
+    </testcase>
+    <testcase classname="extractCobroInfo extracts nomina fields correctly" name="extractCobroInfo extracts nomina fields correctly" time="0.001">
+    </testcase>
+    <testcase classname="extractCobroInfo extracts CLABE fields correctly" name="extractCobroInfo extracts CLABE fields correctly" time="0">
+    </testcase>
+    <testcase classname="validateSolicitudEntities — end-to-end passes for a fully valid nomina solicitud" name="validateSolicitudEntities — end-to-end passes for a fully valid nomina solicitud" time="0">
+    </testcase>
+    <testcase classname="validateSolicitudEntities — end-to-end aggregates errors from contratante + beneficiarios" name="validateSolicitudEntities — end-to-end aggregates errors from contratante + beneficiarios" time="0.001">
+    </testcase>
+    <testcase classname="Constants — dropdown values PARENTESCOS has at least 5 entries" name="Constants — dropdown values PARENTESCOS has at least 5 entries" time="0">
+    </testcase>
+    <testcase classname="Constants — dropdown values PARENTESCOS includes expected values" name="Constants — dropdown values PARENTESCOS includes expected values" time="0">
+    </testcase>
+    <testcase classname="Constants — dropdown values ESTADOS_MX has all 32 states+CDMX (32 entries)" name="Constants — dropdown values ESTADOS_MX has all 32 states+CDMX (32 entries)" time="0">
+    </testcase>
+    <testcase classname="Constants — dropdown values ESTADOS_MX includes Ciudad de México" name="Constants — dropdown values ESTADOS_MX includes Ciudad de México" time="0">
+    </testcase>
+    <testcase classname="Constants — dropdown values DEPENDENCIAS includes IMSS, ISSSTE, SEP" name="Constants — dropdown values DEPENDENCIAS includes IMSS, ISSSTE, SEP" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="matchFoliosByDependencia" errors="0" failures="0" skipped="0" timestamp="2026-03-16T18:35:32" time="0.023" tests="15">
+    <testcase classname="matchFoliosByDependencia returns IMSS folios for &quot;IMSS&quot; input" name="matchFoliosByDependencia returns IMSS folios for &quot;IMSS&quot; input" time="0.001">
+    </testcase>
+    <testcase classname="matchFoliosByDependencia returns ISSSTE folios for &quot;ISSSTE&quot; input" name="matchFoliosByDependencia returns ISSSTE folios for &quot;ISSSTE&quot; input" time="0">
+    </testcase>
+    <testcase classname="matchFoliosByDependencia returns SEP folios for &quot;SEP&quot; input" name="matchFoliosByDependencia returns SEP folios for &quot;SEP&quot; input" time="0.001">
+    </testcase>
+    <testcase classname="matchFoliosByDependencia returns GOB CDMX folio for &quot;CDMX&quot; input" name="matchFoliosByDependencia returns GOB CDMX folio for &quot;CDMX&quot; input" time="0">
+    </testcase>
+    <testcase classname="matchFoliosByDependencia returns empty for unknown dependencia" name="matchFoliosByDependencia returns empty for unknown dependencia" time="0">
+    </testcase>
+    <testcase classname="matchFoliosByDependencia returns empty for null/empty input" name="matchFoliosByDependencia returns empty for null/empty input" time="0">
+    </testcase>
+    <testcase classname="matchFoliosByDependencia is case-insensitive" name="matchFoliosByDependencia is case-insensitive" time="0.001">
+    </testcase>
+    <testcase classname="matchTipoContratacion returns correct rule for TC=01 (Confianza)" name="matchTipoContratacion returns correct rule for TC=01 (Confianza)" time="0">
+    </testcase>
+    <testcase classname="matchTipoContratacion returns Jub. Ant. for TC=10" name="matchTipoContratacion returns Jub. Ant. for TC=10" time="0">
+    </testcase>
+    <testcase classname="matchTipoContratacion returns undefined for unknown TC" name="matchTipoContratacion returns undefined for unknown TC" time="0.001">
+    </testcase>
+    <testcase classname="matchTipoContratacion is case-insensitive for MANDOS" name="matchTipoContratacion is case-insensitive for MANDOS" time="0">
+    </testcase>
+    <testcase classname="matchTipoContratacion all TC rules have contrato field set" name="matchTipoContratacion all TC rules have contrato field set" time="0">
+    </testcase>
+    <testcase classname="FOLIO_RULES integrity all folio rules have at least one folio" name="FOLIO_RULES integrity all folio rules have at least one folio" time="0.001">
+    </testcase>
+    <testcase classname="FOLIO_RULES integrity all folios start with N or P (GNP format)" name="FOLIO_RULES integrity all folios start with N or P (GNP format)" time="0.001">
+    </testcase>
+    <testcase classname="FOLIO_RULES integrity no duplicate folio numbers across all rules" name="FOLIO_RULES integrity no duplicate folio numbers across all rules" time="0">
+    </testcase>
+  </testsuite>
+</testsuites>
