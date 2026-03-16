@@ -27,8 +27,13 @@ export interface Contratante {
   genero: string
   rfc: string
   curp: string
+  lugar_nacimiento: string
+  nacionalidad: string
+  identificacion_fiscal_extranjero: string
+  regimen_fiscal: string
   tipo_id: string
   num_id: string
+  id_emisor: string          // ✅ organismo_emisor — Opus gap I5
   email: string
   telefono: string
   calle: string
@@ -38,12 +43,16 @@ export interface Contratante {
   colonia: string
   estado: string
   municipio: string
+  pais: string
   ocupacion: string
   dependencia: string
 }
 
 // ----------------------------------------------------------
 // Sub-entity: Asegurado (insured applicant)
+// CORRECTED 2026-03-16 per Opus audit C1:
+//   - rfc, nacionalidad, identificacion_fiscal_extranjero, pais, municipio
+//     were previously absent or mapped to contratante fields — FIXED.
 // ----------------------------------------------------------
 export interface Asegurado {
   nombres: string
@@ -51,7 +60,26 @@ export interface Asegurado {
   ap_materno: string
   fecha_nac: string
   genero: string
-  rfc: string
+  rfc: string                              // ✅ asegurado_rfc (not contratante_rfc)
+  nacionalidad: string                     // ✅ asegurado_nacionalidad (new)
+  identificacion_fiscal_extranjero: string // ✅ asegurado_identificacion_fiscal_extranjero (new)
+  tipo_id: string
+  num_id: string
+  id_emisor: string
+  email: string
+  telefono: string
+  ocupacion: string
+  estado_nacimiento: string
+  // Address (conditional — shown when misma_domicilio_contratante = false)
+  mismo_domicilio_contratante: boolean
+  calle: string
+  num_ext: string
+  num_int: string
+  cp: string
+  colonia: string
+  estado: string
+  municipio: string                        // ✅ asegurado_municipio (not alcaldia)
+  pais: string                             // ✅ asegurado_pais (not contratante_pais)
   // Note: when misma_persona=true, asegurado fields mirror contratante
   misma_persona: boolean
 }
@@ -141,6 +169,14 @@ export interface FormData {
   banco: string
   fecha_inicio_cobro: string
 
+  // Step 2: Contratante — extra fields added 2026-03-16
+  contratante_lugar_nacimiento: string
+  contratante_nacionalidad: string
+  contratante_identificacion_fiscal_extranjero: string
+  contratante_regimen_fiscal: string
+  contratante_id_emisor: string             // organismo_emisor (Opus gap I5)
+  contratante_pais: string
+
   // Step 4: Asegurado
   misma_persona: boolean
   asegurado_nombres: string
@@ -148,7 +184,26 @@ export interface FormData {
   asegurado_ap_materno: string
   asegurado_fecha_nac: string
   asegurado_genero: string
-  asegurado_rfc: string
+  asegurado_rfc: string                     // ✅ CORRECTED: own field, not contratante_rfc
+  asegurado_nacionalidad: string            // ✅ NEW
+  asegurado_identificacion_fiscal_extranjero: string // ✅ NEW
+  asegurado_tipo_id: string
+  asegurado_num_id: string
+  asegurado_id_emisor: string
+  asegurado_email: string
+  asegurado_telefono: string
+  asegurado_ocupacion: string
+  asegurado_estado_nacimiento: string
+  asegurado_mismo_domicilio_contratante: boolean
+  asegurado_calle: string
+  asegurado_num_ext: string
+  asegurado_num_int: string
+  asegurado_cp: string
+  asegurado_colonia: string
+  asegurado_estado: string
+  asegurado_municipio: string               // ✅ CORRECTED: own field, not alcaldia
+  asegurado_pais: string                    // ✅ CORRECTED: own field, not contratante_pais
+  asegurado_tiene_otras_polizas: 'Si' | 'No' | ''
 
   // Step 5: Plan
   plan: string
@@ -196,8 +251,13 @@ export function extractContratante(fd: FormData): Contratante {
     genero: fd.contratante_genero,
     rfc: fd.contratante_rfc,
     curp: fd.contratante_curp,
+    lugar_nacimiento: fd.contratante_lugar_nacimiento ?? '',
+    nacionalidad: fd.contratante_nacionalidad ?? '',
+    identificacion_fiscal_extranjero: fd.contratante_identificacion_fiscal_extranjero ?? '',
+    regimen_fiscal: fd.contratante_regimen_fiscal ?? '',
     tipo_id: fd.contratante_tipo_id,
     num_id: fd.contratante_num_id,
+    id_emisor: fd.contratante_id_emisor ?? '',
     email: fd.contratante_email,
     telefono: fd.contratante_telefono,
     calle: fd.contratante_calle,
@@ -207,14 +267,18 @@ export function extractContratante(fd: FormData): Contratante {
     colonia: fd.contratante_colonia,
     estado: fd.contratante_estado,
     municipio: fd.contratante_municipio,
+    pais: fd.contratante_pais ?? 'MEXICO',
     ocupacion: fd.contratante_ocupacion,
     dependencia: fd.contratante_dependencia,
   }
 }
 
 /** Extract the Asegurado entity from a flat FormData.
- *  When misma_persona=true the name/DOB/gender/RFC fields
- *  are derived from the contratante fields. */
+ *  When misma_persona=true all asegurado fields are derived from contratante.
+ *  IMPORTANT: PDF generation must BLANK the asegurado section when misma_persona=true
+ *  per GNP business rule (Opus audit C3). This extractor always returns full data —
+ *  the PDF generator is responsible for suppressing the section.
+ */
 export function extractAsegurado(fd: FormData): Asegurado {
   if (fd.misma_persona) {
     return {
@@ -224,6 +288,24 @@ export function extractAsegurado(fd: FormData): Asegurado {
       fecha_nac: fd.contratante_fecha_nac,
       genero: fd.contratante_genero,
       rfc: fd.contratante_rfc,
+      nacionalidad: fd.contratante_nacionalidad ?? '',
+      identificacion_fiscal_extranjero: fd.contratante_identificacion_fiscal_extranjero ?? '',
+      tipo_id: fd.contratante_tipo_id,
+      num_id: fd.contratante_num_id,
+      id_emisor: fd.contratante_id_emisor ?? '',
+      email: fd.contratante_email,
+      telefono: fd.contratante_telefono,
+      ocupacion: fd.contratante_ocupacion,
+      estado_nacimiento: '',
+      mismo_domicilio_contratante: true,
+      calle: fd.contratante_calle,
+      num_ext: fd.contratante_num_ext,
+      num_int: fd.contratante_num_int,
+      cp: fd.contratante_cp,
+      colonia: fd.contratante_colonia,
+      estado: fd.contratante_estado,
+      municipio: fd.contratante_municipio,
+      pais: fd.contratante_pais ?? 'MEXICO',
       misma_persona: true,
     }
   }
@@ -233,7 +315,25 @@ export function extractAsegurado(fd: FormData): Asegurado {
     ap_materno: fd.asegurado_ap_materno,
     fecha_nac: fd.asegurado_fecha_nac,
     genero: fd.asegurado_genero,
-    rfc: fd.asegurado_rfc,
+    rfc: fd.asegurado_rfc,                             // ✅ asegurado's own RFC
+    nacionalidad: fd.asegurado_nacionalidad ?? '',      // ✅ asegurado's own field
+    identificacion_fiscal_extranjero: fd.asegurado_identificacion_fiscal_extranjero ?? '',
+    tipo_id: fd.asegurado_tipo_id ?? '',
+    num_id: fd.asegurado_num_id ?? '',
+    id_emisor: fd.asegurado_id_emisor ?? '',
+    email: fd.asegurado_email ?? '',
+    telefono: fd.asegurado_telefono ?? '',
+    ocupacion: fd.asegurado_ocupacion ?? '',
+    estado_nacimiento: fd.asegurado_estado_nacimiento ?? '',
+    mismo_domicilio_contratante: fd.asegurado_mismo_domicilio_contratante ?? true,
+    calle: fd.asegurado_calle ?? '',
+    num_ext: fd.asegurado_num_ext ?? '',
+    num_int: fd.asegurado_num_int ?? '',
+    cp: fd.asegurado_cp ?? '',
+    colonia: fd.asegurado_colonia ?? '',
+    estado: fd.asegurado_estado ?? '',
+    municipio: fd.asegurado_municipio ?? '',           // ✅ asegurado_municipio (not alcaldia)
+    pais: fd.asegurado_pais ?? 'MEXICO',               // ✅ asegurado's own pais
     misma_persona: false,
   }
 }
@@ -371,6 +471,7 @@ export const INITIAL_FORM_DATA: FormData = {
   clave_agente: '',
   nombre_agente: '',
   folio: '',
+  // Contratante
   contratante_nombres: '',
   contratante_ap_paterno: '',
   contratante_ap_materno: '',
@@ -378,8 +479,13 @@ export const INITIAL_FORM_DATA: FormData = {
   contratante_genero: '',
   contratante_rfc: '',
   contratante_curp: '',
+  contratante_lugar_nacimiento: '',
+  contratante_nacionalidad: 'MEX',
+  contratante_identificacion_fiscal_extranjero: '',
+  contratante_regimen_fiscal: '',
   contratante_tipo_id: 'INE',
   contratante_num_id: '',
+  contratante_id_emisor: '',
   contratante_email: '',
   contratante_telefono: '',
   contratante_calle: '',
@@ -389,6 +495,7 @@ export const INITIAL_FORM_DATA: FormData = {
   contratante_colonia: '',
   contratante_estado: '',
   contratante_municipio: '',
+  contratante_pais: 'MEXICO',
   contratante_ocupacion: '',
   contratante_dependencia: '',
   nexos_delincuencia: 'no',
@@ -400,6 +507,7 @@ export const INITIAL_FORM_DATA: FormData = {
   clabe: '',
   banco: '',
   fecha_inicio_cobro: '',
+  // Asegurado
   misma_persona: true,
   asegurado_nombres: '',
   asegurado_ap_paterno: '',
@@ -407,6 +515,26 @@ export const INITIAL_FORM_DATA: FormData = {
   asegurado_fecha_nac: '',
   asegurado_genero: '',
   asegurado_rfc: '',
+  asegurado_nacionalidad: 'MEX',
+  asegurado_identificacion_fiscal_extranjero: '',
+  asegurado_tipo_id: 'INE',
+  asegurado_num_id: '',
+  asegurado_id_emisor: '',
+  asegurado_email: '',
+  asegurado_telefono: '',
+  asegurado_ocupacion: '',
+  asegurado_estado_nacimiento: '',
+  asegurado_mismo_domicilio_contratante: true,
+  asegurado_calle: '',
+  asegurado_num_ext: '',
+  asegurado_num_int: '',
+  asegurado_cp: '',
+  asegurado_colonia: '',
+  asegurado_estado: '',
+  asegurado_municipio: '',
+  asegurado_pais: 'MEXICO',
+  asegurado_tiene_otras_polizas: '',
+  // Plan
   plan: '',
   periodicidad: '',
   prima_base: '',
