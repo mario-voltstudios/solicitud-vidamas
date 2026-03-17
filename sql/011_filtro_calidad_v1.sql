@@ -210,6 +210,7 @@ COMMENT ON COLUMN quality_overrides.overridden_by IS 'Must be Mario''s user id. 
 -- Upserted by the filter engine after each run.
 
 CREATE TABLE IF NOT EXISTS policy_quality_state (
+  id                    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   -- Natural key: prefer policy_number when available, else solicitud_id
   policy_number         text,
   solicitud_id          text,
@@ -242,7 +243,7 @@ CREATE TABLE IF NOT EXISTS policy_quality_state (
   override_required     boolean           NOT NULL DEFAULT false,
   updated_at            timestamptz       NOT NULL DEFAULT now(),
 
-  PRIMARY KEY (COALESCE(policy_number, ''), COALESCE(solicitud_id, '')),
+  CONSTRAINT uq_policy_quality_state_natural UNIQUE NULLS NOT DISTINCT (solicitud_id, policy_number),
   CONSTRAINT pqs_at_least_one_key CHECK (
     policy_number IS NOT NULL OR solicitud_id IS NOT NULL
   )
@@ -259,8 +260,8 @@ CREATE INDEX IF NOT EXISTS idx_pqs_solicitud         ON policy_quality_state(sol
 
 CREATE TABLE IF NOT EXISTS email_policy_events (
   id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  source_message_id text              NOT NULL UNIQUE,
-  -- Gmail message ID — prevents duplicate ingestion
+  source_message_id text              NOT NULL,
+  -- Gmail message ID — paired with event_type for idempotent upserts
   policy_number     text              NOT NULL,
   event_type        email_event_type  NOT NULL,
   matched_phrase    text,             -- exact substring that matched (e.g. "cancelación")

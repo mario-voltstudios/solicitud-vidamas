@@ -7,8 +7,13 @@
 
 -- 1. Add unique constraint on email_policy_events(source_message_id, event_type)
 --    Required for upsert idempotency in ingest-emails job.
-ALTER TABLE email_policy_events
-  ADD CONSTRAINT IF NOT EXISTS uq_email_event_msg_type UNIQUE (source_message_id, event_type);
+DO $$ BEGIN
+  ALTER TABLE email_policy_events
+    ADD CONSTRAINT uq_email_event_msg_type UNIQUE (source_message_id, event_type);
+EXCEPTION
+  WHEN duplicate_table THEN NULL;
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- 2. Add resolved_at + resolution_notes to quality_findings if not present
 --    (may already exist from 011 migration — idempotent via IF NOT EXISTS)

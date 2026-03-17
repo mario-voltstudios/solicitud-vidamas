@@ -1,4 +1,3 @@
-'use server'
 // ============================================================
 // Quality Override Dashboard — Mario Only
 // /quality — server component, reads open hard stops
