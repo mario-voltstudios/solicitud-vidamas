@@ -10,6 +10,7 @@ import { createAirtableRecord } from '@/lib/airtable'
 import { backupFilesToDrive } from '@/lib/google-drive'
 import { getUploadedDocs } from '@/lib/dependencia-rules'
 import { deriveIntakeStatus } from '@/lib/intake-status'
+import { runIntakeFiltro } from '@/lib/filtro-calidad/intake-hook'
 
 const INEDataSchema = z.object({
   nombres: z.string().describe('First name(s) of the person'),
@@ -264,6 +265,19 @@ export async function submitSolicitud(formData: FormData) {
     fecha_firma: new Date().toISOString().split('T')[0],
     updated_at: new Date().toISOString(),
   }
+
+  // ── Filtro de Calidad — Intake Gate ───────────────────────────────────────
+  // Hard stops block submission entirely. Flags are logged but do not block.
+  // Quality persistence failures are non-blocking (swallowed inside the hook).
+  const filtroResult = await runIntakeFiltro(formData, supabase)
+  if (filtroResult.blocked) {
+    return {
+      success: false,
+      error: filtroResult.summary_text,
+      filtroFindings: filtroResult.findings,
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   const { data, error } = await supabase
     .from('solicitudes')
