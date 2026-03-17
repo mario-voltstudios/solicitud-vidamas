@@ -1,0 +1,128 @@
+PASS tests/dependencia-rules.test.ts
+  normalizeDependencia
+    ✓ returns IMSS_ACTIVOS for "IMSS" (2 ms)
+    ✓ returns IMSS_JUBILADOS for "IMSS JUBILADOS" (1 ms)
+    ✓ returns IMSS_JUBILADOS for "IMSS JUB."
+    ✓ returns ISSSTE for "ISSSTE" (1 ms)
+    ✓ returns SEP for "SEP"
+    ✓ returns GOB_CDMX for "GOBIERNO CDMX" (1 ms)
+    ✓ returns GOB_CDMX for "CIUDAD DE MEXICO"
+    ✓ returns GOBIERNO for generic "GOBIERNO ESTATAL" (1 ms)
+    ✓ returns OTRA for unknown
+    ✓ returns SIN_DEPENDENCIA for empty string
+    ✓ returns SIN_DEPENDENCIA for null (1 ms)
+    ✓ is case-insensitive
+  getDependenciaRequirements — IMSS Activos + nómina
+    ✓ includes ine_frente
+    ✓ includes ine_reverso
+    ✓ includes talon (nomina)
+    ✓ includes solicitud_p1 (1 ms)
+    ✓ includes solicitud_p2
+    ✓ includes solicitud_p3
+    ✓ does NOT include carta_instruccion
+    ✓ does NOT include constancia_derechohabiente
+    ✓ does NOT include clave_unica_pago (1 ms)
+    ✓ all signature docs are required
+  getDependenciaRequirements — IMSS Jubilados + nómina
+    ✓ includes carta_instruccion (required) (1 ms)
+    ✓ includes talon
+    ✓ includes signature docs p1-p3 (1 ms)
+  getDependenciaRequirements — ISSSTE + nómina
+    ✓ includes constancia_derechohabiente (optional)
+    ✓ does NOT include carta_instruccion
+  getDependenciaRequirements — SEP + nómina
+    ✓ includes clave_unica_pago (optional)
+    ✓ does NOT include carta_instruccion
+    ✓ does NOT include constancia_derechohabiente
+  getDependenciaRequirements — Gobierno CDMX + nómina
+    ✓ includes signature docs (1 ms)
+    ✓ does NOT include carta_instruccion
+  getDependenciaRequirements — CLABE payment (no nómina)
+    ✓ does NOT include talon when forma_cobro=clabe
+    ✓ includes ine_frente and ine_reverso (1 ms)
+  getMissingRequiredDocs
+    ✓ returns empty when all required docs are present for IMSS+nómina
+    ✓ returns talon as missing when forma_cobro=nomina and talon not uploaded
+    ✓ returns carta_instruccion as missing for IMSS Jubilados without it
+    ✓ does NOT flag clave_unica_pago as missing for SEP (it is optional)
+    ✓ does NOT flag constancia_derechohabiente as missing for ISSSTE (it is optional)
+
+PASS tests/types-validation.test.ts
+  validateBeneficiarios
+    ✓ passes for single beneficiario at 100% (1 ms)
+    ✓ passes for two beneficiarios summing to 100%
+    ✓ fails when beneficiarios is empty
+    ✓ fails when sum < 100 (1 ms)
+    ✓ fails when sum > 100
+    ✓ allows float drift (e.g. 33.33+33.33+33.34)
+    ✓ fails when porcentaje is 0 (1 ms)
+    ✓ fails when beneficiario missing nombres
+    ✓ fails when beneficiario missing parentesco
+    ✓ fails when beneficiario missing fecha_nac (1 ms)
+    ✓ allows multiple beneficiarios with non-round sums at 100
+  validateContratante
+    ✓ passes for fully populated contratante (1 ms)
+    ✓ fails when nombres is empty
+    ✓ fails when email is empty
+    ✓ fails when dependencia is empty
+  validateAsegurado — misma_persona=true
+    ✓ passes without asegurado fields when misma_persona=true
+  validateAsegurado — misma_persona=false
+    ✓ fails when asegurado_nombres is empty
+    ✓ passes when all asegurado fields are provided (1 ms)
+  extractAsegurado — misma_persona mirror
+    ✓ mirrors contratante fields when misma_persona=true
+    ✓ uses asegurado fields when misma_persona=false (1 ms)
+  extractCobroInfo
+    ✓ extracts nomina fields correctly
+    ✓ extracts CLABE fields correctly
+  validateSolicitudEntities — end-to-end
+    ✓ passes for a fully valid nomina solicitud (1 ms)
+    ✓ aggregates errors from contratante + beneficiarios
+  Constants — dropdown values
+    ✓ PARENTESCOS has at least 5 entries
+    ✓ PARENTESCOS includes expected values
+    ✓ ESTADOS_MX has all 32 states+CDMX (32 entries)
+    ✓ ESTADOS_MX includes Ciudad de México
+    ✓ DEPENDENCIAS includes IMSS, ISSSTE, SEP
+
+PASS tests/release-folder-rules.test.ts
+  matchFoliosByDependencia
+    ✓ returns IMSS folios for "IMSS" input
+    ✓ returns ISSSTE folios for "ISSSTE" input (1 ms)
+    ✓ returns SEP folios for "SEP" input
+    ✓ returns GOB CDMX folio for "CDMX" input
+    ✓ returns empty for unknown dependencia (1 ms)
+    ✓ returns empty for null/empty input
+    ✓ is case-insensitive
+  matchTipoContratacion
+    ✓ returns correct rule for TC=01 (Confianza)
+    ✓ returns Jub. Ant. for TC=10 (1 ms)
+    ✓ returns undefined for unknown TC
+    ✓ is case-insensitive for MANDOS
+    ✓ all TC rules have contrato field set (1 ms)
+  FOLIO_RULES integrity
+    ✓ all folio rules have at least one folio (1 ms)
+    ✓ all folios start with N or P (GNP format) (1 ms)
+    ✓ no duplicate folio numbers across all rules
+
+PASS tests/intake-status.test.ts
+  deriveIntakeStatus — IMSS Activos + nómina
+    ✓ returns ready_for_emision when all required docs uploaded
+    ✓ returns pending_verification when docs OK but video missing (1 ms)
+    ✓ returns pending_docs when talon is missing
+    ✓ returns pending_docs when INE docs are missing
+  deriveIntakeStatus — IMSS Jubilados
+    ✓ returns pending_docs when carta_instruccion is missing (1 ms)
+    ✓ returns ready_for_emision when carta_instruccion is present + video
+  deriveIntakeStatus — CLABE payment
+    ✓ returns pending_docs when INE missing (no talon needed for CLABE) (1 ms)
+    ✓ does NOT list talon as missing for CLABE payment
+
+Test Suites: 4 passed, 4 total
+Tests:       91 passed, 91 total
+Snapshots:   0 total
+Time:        0.627 s, estimated 1 s
+Ran all test suites.
+Test results written to: artifacts/jest-results-2026-03-17.json
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?
