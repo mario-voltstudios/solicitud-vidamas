@@ -19,6 +19,7 @@ import type {
   QualityStatusLabel,
 } from './types'
 import { RULE_CODES } from './types'
+import { compareFaces, faceMatchToFinding } from './face-match'
 
 // ──────────────────────────────────────────────────────────────
 // Main entry point
@@ -42,9 +43,7 @@ export async function runIntakeFiltro(
     })
   }
 
-  // -- Rule B: Seller/agent in video (placeholder — real check requires video analysis) --
-  // When video analysis is implemented, this becomes async.
-  // For now: flag as pending_manual_review if video present but unanalyzed.
+  // -- Rule B: Seller/agent in video --
   if (formData.docs_video && !formData.nombre_agente) {
     findings.push({
       severity: 'stop',
@@ -53,6 +52,36 @@ export async function runIntakeFiltro(
       status_label: 'pending_manual_review',
       title: 'Nombre del agente no capturado',
       detail: 'El nombre del agente debe estar en el video y coincidir con el agente de registro.',
+    })
+  }
+
+  // -- Rule B2: Face match — INE photo vs video frame --
+  // compareFaces() is a no-op when FACE_MATCH_PROVIDER=none (default).
+  // When provider is configured, runs async face comparison.
+  // Inconclusive/skipped → flag (manual review), not a hard stop.
+  // Mismatch → hard stop.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fd = formData as any
+  const inePhoto: string | undefined = fd.docs_ine_foto as string | undefined
+  const videoFrame: string | undefined = fd.docs_video_frame as string | undefined
+  if (inePhoto && videoFrame) {
+    try {
+      const faceResult = await compareFaces(inePhoto, videoFrame)
+      const faceFinding = faceMatchToFinding(faceResult, solicitudId)
+      if (faceFinding) findings.push(faceFinding)
+    } catch {
+      // Face match errors must never block submission — already handled inside compareFaces
+    }
+  } else if (formData.docs_video && !videoFrame) {
+    // Video present but no frame extracted — route to manual review
+    findings.push({
+      severity: 'flag',
+      category: 'face_match',
+      rule_code: RULE_CODES.FACE_MATCH_INCONCLUSIVE,
+      status_label: 'pending_manual_review',
+      title: 'Face match: frame de video no disponible — revisión manual',
+      detail: 'No se pudo extraer frame del video para comparación facial con INE.',
+      detected_at: new Date().toISOString(),
     })
   }
 

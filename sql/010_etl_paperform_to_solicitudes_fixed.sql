@@ -54,6 +54,7 @@ ALTER TABLE solicitudes
   ADD COLUMN IF NOT EXISTS contratante_lugar_nacimiento            text,
   ADD COLUMN IF NOT EXISTS contratante_identificacion_fiscal_extranjero text,
   ADD COLUMN IF NOT EXISTS contratante_regimen_fiscal              text,
+  ADD COLUMN IF NOT EXISTS contratante_tipo_identificacion         text,
   ADD COLUMN IF NOT EXISTS contratante_identificacion_emisor       text,
   ADD COLUMN IF NOT EXISTS contratante_identificacion_numero       text,
   ADD COLUMN IF NOT EXISTS contratante_numero_exterior             text,
@@ -202,7 +203,7 @@ BEGIN
   IF v_sol_id IS NULL THEN
     -- Cast prima
     BEGIN
-      v_prima_num := REPLACE(COALESCE(v_pf.prima, '0'), ',', '')::numeric;
+      v_prima_num := NULLIF(REGEXP_REPLACE(COALESCE(v_pf.prima, '0'), '[^0-9.-]', '', 'g'), '')::numeric;
     EXCEPTION WHEN others THEN
       v_prima_num := NULL;
     END;
@@ -311,7 +312,7 @@ BEGIN
       CASE WHEN v_misma THEN
         NULLIF(CONCAT_WS('-', NULLIF(v_data->>'d5ecc',''), NULLIF(v_data->>'admv',''), NULLIF(v_data->>'2n6kk','')), '--')::date
       ELSE
-        NULLIF(CONCAT_WS('-', NULLIF(v_data->>'4kqgs',''), NULLIF(v_data->>'6s7ed',''), NULLIF(v_data->>'5tfr2','')), '--')::date
+        NULLIF(CONCAT_WS('-', NULLIF(v_data->>'4kqgs',''), NULLIF(v_data->>'6s7ed',''), NULLIF(v_data->>'5tfr2','')), '')::date
       END,
       CASE WHEN v_misma THEN v_data->>'8k8li' ELSE v_data->>'ep46p' END,
       CASE WHEN v_misma THEN v_data->>'124v1' ELSE v_data->>'dkgeo' END, -- ✅ asegurado_rfc
@@ -333,12 +334,12 @@ BEGIN
       v_data->>'9218h',
       -- Plan
       v_data->>'19p7b', v_data->>'ch9ma', v_pf.periodicidad, v_data->>'fjel5',
-      v_pf.suma_asegurada::numeric, v_prima_num,
-      NULLIF(v_data->>'9lcsp','')::numeric,
-      NULLIF(v_data->>'1eve8','')::numeric,
-      NULLIF(v_data->>'ei7r3','')::numeric,
+      NULLIF(REGEXP_REPLACE(COALESCE(v_pf.suma_asegurada, ''), '[^0-9.-]', '', 'g'), '')::numeric, v_prima_num,
+      NULLIF(REGEXP_REPLACE(COALESCE(v_data->>'9lcsp', ''), '[^0-9.-]', '', 'g'), '')::numeric,
+      NULLIF(REGEXP_REPLACE(COALESCE(v_data->>'1eve8', ''), '[^0-9.-]', '', 'g'), '')::numeric,
+      NULLIF(REGEXP_REPLACE(COALESCE(v_data->>'ei7r3', ''), '[^0-9.-]', '', 'g'), '')::numeric,
       -- Meta
-      COALESCE(v_pf.score, 'pendiente'), COALESCE(v_pf.created_at, now())
+      COALESCE(v_pf.score::text, 'pendiente'), COALESCE(v_pf.created_at, now())
     )
     RETURNING id INTO v_sol_id;
 
@@ -349,52 +350,84 @@ BEGIN
     -- Beneficiario 1
     IF v_pf.beneficiario_nombre IS NOT NULL THEN
       INSERT INTO solicitud_beneficiarios (solicitud_id, nombres, ap_paterno, ap_materno, parentesco, porcentaje)
-      VALUES (v_sol_id, v_pf.beneficiario_nombre, v_pf.beneficiario_apellido1,
-              v_pf.beneficiario_apellido2, v_pf.beneficiario_parentesco, 0)
+      VALUES (v_sol_id, v_pf.beneficiario_nombre, COALESCE(v_pf.beneficiario_apellido1, ''),
+              COALESCE(v_pf.beneficiario_apellido2, ''), v_pf.beneficiario_parentesco,
+              CASE
+                WHEN v_pf.beneficiario2_nombre IS NOT NULL AND v_pf.beneficiario3_nombre IS NOT NULL THEN 34
+                WHEN v_pf.beneficiario2_nombre IS NOT NULL THEN 50
+                ELSE 100
+              END)
       ON CONFLICT DO NOTHING;
     END IF;
     -- Beneficiario 2
     IF v_pf.beneficiario2_nombre IS NOT NULL THEN
       INSERT INTO solicitud_beneficiarios (solicitud_id, nombres, ap_paterno, ap_materno, parentesco, porcentaje)
-      VALUES (v_sol_id, v_pf.beneficiario2_nombre, v_pf.beneficiario2_apellido1,
-              v_pf.beneficiario2_apellido2, v_pf.beneficiario2_parentesco, 0)
+      VALUES (v_sol_id, v_pf.beneficiario2_nombre, COALESCE(v_pf.beneficiario2_apellido1, ''),
+              COALESCE(v_pf.beneficiario2_apellido2, ''), v_pf.beneficiario2_parentesco,
+              CASE
+                WHEN v_pf.beneficiario3_nombre IS NOT NULL THEN 33
+                ELSE 50
+              END)
       ON CONFLICT DO NOTHING;
     END IF;
     -- Beneficiario 3
     IF v_pf.beneficiario3_nombre IS NOT NULL THEN
       INSERT INTO solicitud_beneficiarios (solicitud_id, nombres, ap_paterno, ap_materno, parentesco, porcentaje)
-      VALUES (v_sol_id, v_pf.beneficiario3_nombre, v_pf.beneficiario3_apellido1,
-              v_pf.beneficiario3_apellido2, v_pf.beneficiario3_parentesco, 0)
+      VALUES (v_sol_id, v_pf.beneficiario3_nombre, COALESCE(v_pf.beneficiario3_apellido1, ''),
+              COALESCE(v_pf.beneficiario3_apellido2, ''), v_pf.beneficiario3_parentesco, 33)
       ON CONFLICT DO NOTHING;
     END IF;
 
     -- --------------------------------------------------------
     -- Insert document URLs into solicitud_documentos
+    -- Live schema is normalized: one row per document
     -- --------------------------------------------------------
     INSERT INTO solicitud_documentos (
       solicitud_id,
-      identificacion_frente, identificacion_reverso,
-      comprobante_domicilio, evidencia_cliente_con_talon_o_solicitud,
-      talon_pago, carta_referido,
-      carta_instruccion_imss, carta_reserva_nomina_nomipay,
-      consentimiento_descuento_gob_cdmx, consentimiento_descuento,
-      carta_no_cancelacion_poliza_anterior,
-      solicitud_hoja_1, solicitud_hoja_2, solicitud_hoja_3,
-      solicitud_hoja_4, solicitud_hoja_5, solicitud_hoja_6,
-      video_aceptacion_poliza
-    ) VALUES (
+      doc_type,
+      source,
+      storage_path,
+      public_url,
+      upload_state,
+      upload_at,
+      ocr_state,
+      backup_state,
+      is_latest,
+      created_by
+    )
+    SELECT
       v_sol_id,
-      pf_extract_url(v_data->'bimvi'), pf_extract_url(v_data->'2d2h2'),
-      pf_extract_url(v_data->'c9ag5'), pf_extract_url(v_data->'dg0kd'),
-      pf_extract_url(v_data->'d0ro'), pf_extract_url(v_data->'sr1t'),
-      pf_extract_url(v_data->'1dst0'), pf_extract_url(v_data->'3umte'),
-      pf_extract_url(v_data->'f17d5'), pf_extract_url(v_data->'9tvu6'),
-      pf_extract_url(v_data->'bk7ke'),
-      pf_extract_url(v_data->'371u8'), pf_extract_url(v_data->'dkvdk'),
-      pf_extract_url(v_data->'ineq'), pf_extract_url(v_data->'ak3ca'),
-      pf_extract_url(v_data->'83t59'), pf_extract_url(v_data->'dkd9e'),
-      pf_extract_url(v_data->'dn3cj')
-    );
+      d.doc_type,
+      'paperform_migration',
+      d.url,
+      'uploaded',
+      COALESCE(v_pf.created_at, now()),
+      CASE WHEN d.doc_type IN ('ine_frente', 'ine_reverso', 'talon') THEN 'pending' ELSE 'skipped' END,
+      'pending',
+      true,
+      COALESCE(NULLIF(v_pf.clave_agente, ''), 'paperform_migration')
+    FROM (
+      VALUES
+        ('ine_frente', pf_extract_url(v_data->'bimvi')),
+        ('ine_reverso', pf_extract_url(v_data->'2d2h2')),
+        ('comprobante_domicilio', pf_extract_url(v_data->'c9ag5')),
+        ('evidencia_cliente_con_talon_o_solicitud', pf_extract_url(v_data->'dg0kd')),
+        ('talon', pf_extract_url(v_data->'d0ro')),
+        ('carta_referido', pf_extract_url(v_data->'sr1t')),
+        ('carta_instruccion_imss', pf_extract_url(v_data->'1dst0')),
+        ('carta_reserva_nomina_nomipay', pf_extract_url(v_data->'3umte')),
+        ('consentimiento_descuento_gob_cdmx', pf_extract_url(v_data->'f17d5')),
+        ('consentimiento_descuento', pf_extract_url(v_data->'9tvu6')),
+        ('carta_no_cancelacion_poliza_anterior', pf_extract_url(v_data->'bk7ke')),
+        ('solicitud_p1', pf_extract_url(v_data->'371u8')),
+        ('solicitud_p2', pf_extract_url(v_data->'dkvdk')),
+        ('solicitud_p3', pf_extract_url(v_data->'ineq')),
+        ('solicitud_p4', pf_extract_url(v_data->'ak3ca')),
+        ('solicitud_p5', pf_extract_url(v_data->'83t59')),
+        ('solicitud_p6', pf_extract_url(v_data->'dkd9e')),
+        ('video', pf_extract_url(v_data->'dn3cj'))
+    ) AS d(doc_type, url)
+    WHERE d.url IS NOT NULL;
 
   END IF;
 

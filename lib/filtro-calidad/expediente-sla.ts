@@ -21,18 +21,19 @@
 //       expediente_sla_breached      — no COMPLETO, SLA window has passed
 //
 // MEXICAN HOLIDAYS:
-//   This module uses a simple weekend-only skip by default.
-//   Pass a custom holidayChecker for full Mexican holiday awareness.
+//   This module uses isHolidayMX from mx-holidays.ts by default.
+//   Pass a custom holidayChecker to override (e.g. in tests).
 // ============================================================
 
 import type { EmailPolicyEvent, ExpedienteState } from './types'
+import { isHolidayMX } from './mx-holidays'
 
 // ----------------------------------------------------------
 // Business day calculation
 // ----------------------------------------------------------
 
-/** Default holiday checker: returns false (no holidays) */
-const defaultIsHoliday = (_date: Date): boolean => false
+/** Default holiday checker: uses Mexican federal holidays */
+const defaultIsHoliday = isHolidayMX
 
 /**
  * Add N business days to a date, skipping weekends and holidays.
