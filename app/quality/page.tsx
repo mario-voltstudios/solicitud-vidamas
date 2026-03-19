@@ -155,6 +155,20 @@ export default async function QualityPage() {
           </div>
         </div>
 
+        {/* Report download */}
+        {f.solicitud_id && (
+          <div className="mt-3 pt-2 border-t border-gray-100 flex gap-2 flex-wrap">
+            <a
+              href={`/api/quality/report/policy/${f.solicitud_id}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              📄 Reporte PDF (póliza)
+            </a>
+          </div>
+        )}
+
         {showOverride && <OverrideForm findingId={f.id} findingTitle={f.title} />}
       </div>
     )
@@ -163,10 +177,32 @@ export default async function QualityPage() {
   return (
     <main className="max-w-4xl mx-auto py-8 px-4">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">🔒 Filtro Calidad — Override Queue</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Solo Mario puede aprobar o rechazar estos hallazgos. Cada decisión queda registrada.
-        </p>
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">🔒 Filtro Calidad — Override Queue</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Solo Mario puede aprobar o rechazar estos hallazgos. Cada decisión queda registrada.
+            </p>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <a
+              href="/api/quality/report/batch"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
+            >
+              📥 Reporte Batch PDF
+            </a>
+            <a
+              href="/api/quality/report/batch?from=2026-01-01"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors"
+            >
+              📊 2026 Completo
+            </a>
+          </div>
+        </div>
         <div className="flex gap-3 mt-3 text-sm">
           <span className="bg-red-50 text-red-700 px-2 py-0.5 rounded font-semibold">🛑 {openStops.length} paradas duras</span>
           <span className="bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded font-semibold">⚠️ {openFlags.length} banderas</span>
