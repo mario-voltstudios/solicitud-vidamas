@@ -37,6 +37,186 @@ const CATEGORY_ICONS: Record<string, string> = {
   duplicate:       '⚠️',
 }
 
+// ──────────────────────────────────────────────────────────────
+// Video Verification helpers
+// ──────────────────────────────────────────────────────────────
+
+const VIDEO_RULE_CODES = new Set([
+  'VIDEO_MISSING', 'VIDEO_DB_LINK_MISSING', 'VIDEO_STORAGE_NOT_FOUND', 'VIDEO_STORAGE_ERROR',
+  'VIDEO_PARSE_ERROR', 'VIDEO_TRANSCRIPT_ERROR', 'VIDEO_FRAME_EXTRACTION_ERROR',
+  'VIDEO_STATEMENT_DETECTION_FAILED', 'VIDEO_INCOMPLETE_POINTS',
+  'VIDEO_AGENT_NAME_NOT_SAID', 'VIDEO_AGENT_NAME_CONFIRMED',
+  'VIDEO_TAMPER_SUSPICIOUS', 'VIDEO_TAMPER_INCONCLUSIVE', 'VIDEO_TAMPER_NOT_EVALUATED',
+  'FACE_MATCH_MISMATCH', 'FACE_MATCH_INCONCLUSIVE', 'SELLER_NAME_MISSING', 'SELLER_NAME_MISMATCH',
+])
+
+function isVideoFinding(f: { rule_code?: string | null; category?: string | null }): boolean {
+  return (
+    VIDEO_RULE_CODES.has(f.rule_code ?? '') ||
+    f.category === 'face_match' ||
+    (f.category === 'doc_authenticity' && Boolean(f.rule_code?.startsWith('VIDEO_')))
+  )
+}
+
+interface FindingLike {
+  rule_code?: string | null
+  evidence?: Record<string, unknown> | null
+  detail?: string | null
+  title?: string
+}
+
+function VideoVerificationPanel({ finding }: { finding: FindingLike }) {
+  const ev = finding.evidence as Record<string, unknown> | null | undefined
+  const rc = finding.rule_code ?? ''
+
+  // Agent name result
+  const agentNameDetected = ev?.agent_name_detected as boolean | null | undefined
+  const agentNameChecked = ev?.agent_name as string | null | undefined
+
+  // Face match
+  const isFaceMatch = rc === 'FACE_MATCH_MISMATCH' || rc === 'FACE_MATCH_INCONCLUSIVE'
+  const faceScore = ev?.score as number | null | undefined
+  const faceVerdict = rc === 'FACE_MATCH_MISMATCH' ? 'mismatch' :
+                      rc === 'FACE_MATCH_INCONCLUSIVE' ? 'inconclusive' : null
+
+  // Tamper signals
+  const tamperRisk = ev?.tamper_risk as string | null | undefined
+  const tamperSignals = (ev?.signals ?? []) as Array<{ signal: string; description: string; severity: string; value?: string | number }>
+
+  // Statement points
+  const pointsDetected = ev?.points_detected as number[] | null | undefined
+  const pointsMissing = ev?.points_missing as number[] | null | undefined
+  const hasMissingPoints = pointsMissing && pointsMissing.length > 0
+
+  const VIDEO_REQUIRED_POINTS: Record<number, string> = {
+    1: 'Nombre completo del asegurado',
+    2: 'Fecha',
+    3: 'Nombre del agente/vendedor',
+    4: 'Aceptación explícita de nueva póliza GNP',
+    5: 'Monto a descontar',
+    6: 'Beneficiarios y porcentajes',
+    7: 'Declaración sobre pólizas existentes',
+  }
+
+  const hasAnyVideoDetail = agentNameChecked !== undefined || isFaceMatch || tamperRisk || hasMissingPoints
+
+  if (!hasAnyVideoDetail) {
+    // Fall back to simple evidence display for basic video findings
+    return (
+      <details className="mt-2">
+        <summary className="text-xs text-gray-400 cursor-pointer">Ver evidencia de video</summary>
+        <pre className="text-xs bg-gray-50 rounded p-2 mt-1 overflow-auto max-h-24">
+          {JSON.stringify(ev, null, 2)}
+        </pre>
+      </details>
+    )
+  }
+
+  return (
+    <div className="mt-3 bg-gray-50 border border-gray-200 rounded p-3 text-xs space-y-2">
+      <div className="font-semibold text-gray-700">🎥 Verificación de Video</div>
+
+      {/* Agent name check */}
+      {agentNameChecked !== undefined && agentNameDetected !== undefined && (
+        <div className={`flex items-center gap-2 px-2 py-1 rounded ${agentNameDetected ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+          <span className="text-base">{agentNameDetected ? '✅' : '❌'}</span>
+          <div>
+            <span className="font-semibold">Nombre del agente en video: </span>
+            {agentNameDetected
+              ? <span>Detectado — &quot;{agentNameChecked}&quot; mencionado</span>
+              : <span className="font-semibold">NO detectado — &quot;{agentNameChecked}&quot; no aparece en transcripción</span>
+            }
+          </div>
+        </div>
+      )}
+      {agentNameChecked !== undefined && agentNameDetected === null && (
+        <div className="flex items-center gap-2 px-2 py-1 rounded bg-gray-100 text-gray-600">
+          <span>⚪</span>
+          <span>Nombre del agente: no evaluado (sin transcripción)</span>
+        </div>
+      )}
+
+      {/* Face match result */}
+      {isFaceMatch && (
+        <div className={`flex items-center gap-2 px-2 py-1 rounded ${faceVerdict === 'mismatch' ? 'bg-red-50 text-red-800' : 'bg-yellow-50 text-yellow-800'}`}>
+          <span className="text-base">{faceVerdict === 'mismatch' ? '❌' : '⚠️'}</span>
+          <div>
+            <span className="font-semibold">Face match (INE vs video): </span>
+            {faceVerdict === 'mismatch'
+              ? <span className="font-semibold">PERSONA DIFERENTE detectada{faceScore != null ? ` — score: ${((faceScore as number) * 100).toFixed(1)}%` : ''}</span>
+              : <span>Inconcluso — revisión manual requerida{faceScore != null ? ` (score: ${((faceScore as number) * 100).toFixed(1)}%)` : ''}</span>
+            }
+          </div>
+        </div>
+      )}
+      {rc === 'FACE_MATCH_INCONCLUSIVE' && (ev?.reason === 'frame_provider_none' || ev?.reason?.toString().includes('not configured')) && (
+        <div className="flex items-center gap-2 px-2 py-1 rounded bg-gray-100 text-gray-600">
+          <span>⚪</span>
+          <span>Face match: proveedor no configurado — requiere revisión manual</span>
+        </div>
+      )}
+
+      {/* Tamper / AI-edit risk */}
+      {tamperRisk && (
+        <div className={`flex items-start gap-2 px-2 py-1 rounded ${
+          tamperRisk === 'suspicious' ? 'bg-orange-50 text-orange-800' :
+          tamperRisk === 'inconclusive' ? 'bg-yellow-50 text-yellow-700' :
+          'bg-gray-50 text-gray-600'
+        }`}>
+          <span className="text-base mt-0.5">
+            {tamperRisk === 'suspicious' ? '🚨' : tamperRisk === 'inconclusive' ? '⚠️' : '✅'}
+          </span>
+          <div>
+            <span className="font-semibold">Detección tamper/AI-edit: </span>
+            <span className={tamperRisk === 'suspicious' ? 'font-semibold' : ''}>
+              {tamperRisk === 'low' ? 'Sin señales detectadas' :
+               tamperRisk === 'suspicious' ? `SOSPECHOSO — ${tamperSignals.length} señal(es) detectada(s)` :
+               tamperRisk === 'inconclusive' ? 'Inconcluso — 1 señal menor' :
+               'No evaluado (sin transcripción)'}
+            </span>
+            {tamperSignals.length > 0 && (
+              <ul className="mt-1 space-y-0.5">
+                {tamperSignals.map((s, i) => (
+                  <li key={i} className="flex items-start gap-1">
+                    <span className={`font-semibold uppercase ${s.severity === 'high' ? 'text-red-700' : s.severity === 'medium' ? 'text-orange-700' : 'text-gray-600'}`}>
+                      [{s.severity}]
+                    </span>
+                    <span>{s.description}{s.value ? ` (${s.value})` : ''}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Statement checklist */}
+      {(hasMissingPoints || (pointsDetected && pointsDetected.length > 0)) && (
+        <div className="border border-gray-200 rounded overflow-hidden">
+          <div className="bg-gray-100 px-2 py-1 font-semibold text-gray-700">Checklist de declaraciones</div>
+          <div className="divide-y divide-gray-100">
+            {[1, 2, 3, 4, 5, 6, 7].map((pt) => {
+              const detected = pointsDetected?.includes(pt)
+              const missing = pointsMissing?.includes(pt)
+              if (detected === undefined && missing === undefined) return null
+              return (
+                <div key={pt} className={`flex items-start gap-2 px-2 py-1 ${missing ? 'bg-red-50' : 'bg-white'}`}>
+                  <span>{detected ? '✅' : missing ? '❌' : '⚪'}</span>
+                  <span className={missing ? 'text-red-700 font-semibold' : 'text-gray-700'}>
+                    Punto {pt}: {VIDEO_REQUIRED_POINTS[pt]}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ──────────────────────────────────────────────────────────────
+
 // Extract CFDI evidence from a finding's evidence object
 function getCFDIEvidence(evidence: Record<string, unknown> | null | undefined) {
   if (!evidence) return null
@@ -143,8 +323,13 @@ export default async function QualityPage() {
               </div>
             )}
 
-            {/* Generic evidence (non-CFDI) */}
-            {f.evidence && !cfdiEv && !cfdiRow && (
+            {/* Video Verification Panel */}
+            {isVideoFinding(f) && (
+              <VideoVerificationPanel finding={f} />
+            )}
+
+            {/* Generic evidence (non-CFDI, non-video) */}
+            {f.evidence && !cfdiEv && !cfdiRow && !isVideoFinding(f) && (
               <details className="mt-2">
                 <summary className="text-xs text-gray-400 cursor-pointer">Ver evidencia</summary>
                 <pre className="text-xs bg-gray-50 rounded p-2 mt-1 overflow-auto max-h-24">
@@ -167,10 +352,13 @@ export default async function QualityPage() {
         <p className="text-sm text-gray-500 mt-1">
           Solo Mario puede aprobar o rechazar estos hallazgos. Cada decisión queda registrada.
         </p>
-        <div className="flex gap-3 mt-3 text-sm">
+        <div className="flex flex-wrap gap-3 mt-3 text-sm">
           <span className="bg-red-50 text-red-700 px-2 py-0.5 rounded font-semibold">🛑 {openStops.length} paradas duras</span>
           <span className="bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded font-semibold">⚠️ {openFlags.length} banderas</span>
           <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-semibold">🧾 {recentCFDI.length} CFDI verificados</span>
+          <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded font-semibold">
+            🎥 {[...openStops, ...openFlags].filter(f => VIDEO_RULE_CODES.has(f.rule_code ?? '') || f.category === 'face_match').length} video
+          </span>
         </div>
       </div>
 

@@ -54,6 +54,15 @@ export const RULE_CODES = {
   FACE_MATCH_INCONCLUSIVE: 'FACE_MATCH_INCONCLUSIVE',
   FACE_MATCH_MISMATCH: 'FACE_MATCH_MISMATCH',
 
+  // Video verification — agent name
+  VIDEO_AGENT_NAME_NOT_SAID: 'VIDEO_AGENT_NAME_NOT_SAID',        // transcript present but agent name not mentioned
+  VIDEO_AGENT_NAME_CONFIRMED: 'VIDEO_AGENT_NAME_CONFIRMED',      // agent name detected in transcript (info signal)
+
+  // Video verification — tamper / AI-edit detection
+  VIDEO_TAMPER_SUSPICIOUS: 'VIDEO_TAMPER_SUSPICIOUS',            // multiple tamper signals detected → manual review
+  VIDEO_TAMPER_INCONCLUSIVE: 'VIDEO_TAMPER_INCONCLUSIVE',        // single signal or low confidence
+  VIDEO_TAMPER_NOT_EVALUATED: 'VIDEO_TAMPER_NOT_EVALUATED',      // no provider/transcript to evaluate
+
   // Dependency requirements
   MISSING_REQUIRED_DOC: 'MISSING_REQUIRED_DOC',
   DEPENDENCY_LEGAL_BLOCKER: 'DEPENDENCY_LEGAL_BLOCKER',
@@ -248,8 +257,40 @@ export interface VideoIngestResult {
   points_detected?: number[]
   /** Required points absent from transcript */
   points_missing?: number[]
+  /** Whether agent name was detected in transcript */
+  agent_name_detected?: boolean
+  /** Tamper/AI-edit risk assessment */
+  tamper_signals?: TamperSignal[]
   /** Additional diagnostic context */
   evidence?: Record<string, unknown>
+}
+
+/**
+ * A single tamper / AI-edit evidence signal.
+ * Multiple signals compound risk. No single signal is conclusive.
+ */
+export interface TamperSignal {
+  signal: string                         // machine key
+  description: string                    // human-readable label
+  severity: 'low' | 'medium' | 'high'   // how suspicious this signal is alone
+  value?: string | number                // observed value (e.g. entropy score, silence_ratio)
+}
+
+/**
+ * Structured video verification summary — surfaced in quality UI.
+ * Aggregates all sub-checks into one display-ready object.
+ */
+export interface VideoVerificationSummary {
+  video_present: boolean
+  transcript_available: boolean
+  points_detected: number[]
+  points_missing: number[]
+  agent_name_said: 'yes' | 'no' | 'not_evaluated'
+  face_match: 'match' | 'mismatch' | 'inconclusive' | 'skipped'
+  face_match_score?: number
+  tamper_risk: 'low' | 'suspicious' | 'inconclusive' | 'not_evaluated'
+  tamper_signals: TamperSignal[]
+  overall_verdict: 'pass' | 'manual_review' | 'hard_stop'
 }
 
 /**

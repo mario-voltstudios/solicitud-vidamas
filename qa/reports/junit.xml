@@ -1,47 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="49" failures="0" errors="0" time="0.35">
-  <testsuite name="parseSATQRUrl" errors="0" failures="0" skipped="0" timestamp="2026-03-19T12:48:16" time="0.107" tests="19">
-    <testcase classname="parseSATQRUrl parses a valid SAT QR URL" name="parseSATQRUrl parses a valid SAT QR URL" time="0.002">
-    </testcase>
-    <testcase classname="parseSATQRUrl returns null for non-SAT URL" name="parseSATQRUrl returns null for non-SAT URL" time="0">
-    </testcase>
-    <testcase classname="parseSATQRUrl returns null for malformed UUID" name="parseSATQRUrl returns null for malformed UUID" time="0.001">
-    </testcase>
-    <testcase classname="parseSATQRUrl returns null for missing required params" name="parseSATQRUrl returns null for missing required params" time="0">
-    </testcase>
-    <testcase classname="parseSATQRUrl normalizes UUID to uppercase" name="parseSATQRUrl normalizes UUID to uppercase" time="0">
-    </testcase>
-    <testcase classname="extractQRFromText finds a SAT QR URL embedded in OCR text" name="extractQRFromText finds a SAT QR URL embedded in OCR text" time="0.001">
-    </testcase>
-    <testcase classname="extractQRFromText returns null when no URL present" name="extractQRFromText returns null when no URL present" time="0.001">
-    </testcase>
-    <testcase classname="extractQRFromText returns null for empty string" name="extractQRFromText returns null for empty string" time="0">
-    </testcase>
-    <testcase classname="extractUUIDFromText extracts a bare UUID from text" name="extractUUIDFromText extracts a bare UUID from text" time="0.001">
-    </testcase>
-    <testcase classname="extractUUIDFromText returns null when no UUID in text" name="extractUUIDFromText returns null when no UUID in text" time="0.001">
-    </testcase>
-    <testcase classname="isValidCFDIUUID accepts valid UUID" name="isValidCFDIUUID accepts valid UUID" time="0">
-    </testcase>
-    <testcase classname="isValidCFDIUUID rejects non-UUID" name="isValidCFDIUUID rejects non-UUID" time="0.001">
-    </testcase>
-    <testcase classname="cfdiValidationToFinding returns null for valid status" name="cfdiValidationToFinding returns null for valid status" time="0.001">
-    </testcase>
-    <testcase classname="cfdiValidationToFinding returns null for skipped status" name="cfdiValidationToFinding returns null for skipped status" time="0">
-    </testcase>
-    <testcase classname="cfdiValidationToFinding returns hard stop finding for duplicate" name="cfdiValidationToFinding returns hard stop finding for duplicate" time="0.001">
-    </testcase>
-    <testcase classname="cfdiValidationToFinding returns hard stop finding for cancelled CFDI" name="cfdiValidationToFinding returns hard stop finding for cancelled CFDI" time="0">
-    </testcase>
-    <testcase classname="cfdiValidationToFinding returns flag finding for SAT unreachable" name="cfdiValidationToFinding returns flag finding for SAT unreachable" time="0">
-    </testcase>
-    <testcase classname="cfdiValidationToFinding returns flag finding for extraction_failed" name="cfdiValidationToFinding returns flag finding for extraction_failed" time="0">
-    </testcase>
-    <testcase classname="cfdiValidationToFinding returns flag finding for not_found" name="cfdiValidationToFinding returns flag finding for not_found" time="0.001">
-    </testcase>
-  </testsuite>
-  <testsuite name="checkVideoDbLink" errors="0" failures="0" skipped="0" timestamp="2026-03-19T12:48:16" time="0.038" tests="30">
-    <testcase classname="checkVideoDbLink returns failed with VIDEO_MISSING context when docs_video is null" name="checkVideoDbLink returns failed with VIDEO_MISSING context when docs_video is null" time="0.001">
+<testsuites name="jest tests" tests="179" failures="0" errors="0" time="0.783">
+  <testsuite name="checkVideoDbLink" errors="0" failures="0" skipped="0" timestamp="2026-03-19T20:24:38" time="0.203" tests="30">
+    <testcase classname="checkVideoDbLink returns failed with VIDEO_MISSING context when docs_video is null" name="checkVideoDbLink returns failed with VIDEO_MISSING context when docs_video is null" time="0.002">
     </testcase>
     <testcase classname="checkVideoDbLink returns failed when docs_video is undefined" name="checkVideoDbLink returns failed when docs_video is undefined" time="0">
     </testcase>
@@ -55,13 +15,13 @@
     </testcase>
     <testcase classname="parseVideoBlob returns ok for a valid mp4 blob" name="parseVideoBlob returns ok for a valid mp4 blob" time="0">
     </testcase>
-    <testcase classname="parseVideoBlob returns ok for unknown MIME type (storage may omit type)" name="parseVideoBlob returns ok for unknown MIME type (storage may omit type)" time="0">
+    <testcase classname="parseVideoBlob returns ok for unknown MIME type (storage may omit type)" name="parseVideoBlob returns ok for unknown MIME type (storage may omit type)" time="0.001">
     </testcase>
-    <testcase classname="parseVideoBlob returns failed for non-video MIME type" name="parseVideoBlob returns failed for non-video MIME type" time="0">
+    <testcase classname="parseVideoBlob returns failed for non-video MIME type" name="parseVideoBlob returns failed for non-video MIME type" time="0.001">
     </testcase>
     <testcase classname="parseVideoBlob returns failed for suspiciously small blob (&lt; 1KB)" name="parseVideoBlob returns failed for suspiciously small blob (&lt; 1KB)" time="0">
     </testcase>
-    <testcase classname="parseVideoBlob returns ok for quicktime (.mov) blob" name="parseVideoBlob returns ok for quicktime (.mov) blob" time="0">
+    <testcase classname="parseVideoBlob returns ok for quicktime (.mov) blob" name="parseVideoBlob returns ok for quicktime (.mov) blob" time="0.001">
     </testcase>
     <testcase classname="detectVideoStatements detects all 7 points in a complete transcript with existing policies" name="detectVideoStatements detects all 7 points in a complete transcript with existing policies" time="0.001">
     </testcase>
@@ -77,13 +37,13 @@
     </testcase>
     <testcase classname="videoIngestResultToFinding returns null for skipped stage" name="videoIngestResultToFinding returns null for skipped stage" time="0">
     </testcase>
-    <testcase classname="videoIngestResultToFinding returns VIDEO_MISSING finding for null docs_video" name="videoIngestResultToFinding returns VIDEO_MISSING finding for null docs_video" time="0.001">
+    <testcase classname="videoIngestResultToFinding returns VIDEO_MISSING finding for null docs_video" name="videoIngestResultToFinding returns VIDEO_MISSING finding for null docs_video" time="0">
     </testcase>
-    <testcase classname="videoIngestResultToFinding returns VIDEO_DB_LINK_MISSING for empty string docs_video" name="videoIngestResultToFinding returns VIDEO_DB_LINK_MISSING for empty string docs_video" time="0">
+    <testcase classname="videoIngestResultToFinding returns VIDEO_DB_LINK_MISSING for empty string docs_video" name="videoIngestResultToFinding returns VIDEO_DB_LINK_MISSING for empty string docs_video" time="0.002">
     </testcase>
-    <testcase classname="videoIngestResultToFinding returns VIDEO_STORAGE_NOT_FOUND for not-found storage error" name="videoIngestResultToFinding returns VIDEO_STORAGE_NOT_FOUND for not-found storage error" time="0.001">
+    <testcase classname="videoIngestResultToFinding returns VIDEO_STORAGE_NOT_FOUND for not-found storage error" name="videoIngestResultToFinding returns VIDEO_STORAGE_NOT_FOUND for not-found storage error" time="0">
     </testcase>
-    <testcase classname="videoIngestResultToFinding returns VIDEO_STORAGE_ERROR for unexpected storage error" name="videoIngestResultToFinding returns VIDEO_STORAGE_ERROR for unexpected storage error" time="0">
+    <testcase classname="videoIngestResultToFinding returns VIDEO_STORAGE_ERROR for unexpected storage error" name="videoIngestResultToFinding returns VIDEO_STORAGE_ERROR for unexpected storage error" time="0.001">
     </testcase>
     <testcase classname="videoIngestResultToFinding returns VIDEO_PARSE_ERROR for parse failure" name="videoIngestResultToFinding returns VIDEO_PARSE_ERROR for parse failure" time="0">
     </testcase>
@@ -99,7 +59,319 @@
     </testcase>
     <testcase classname="ingestVideo (unit — mocked supabase) returns parse failure when blob has wrong mime type" name="ingestVideo (unit — mocked supabase) returns parse failure when blob has wrong mime type" time="0">
     </testcase>
-    <testcase classname="ingestVideo (unit — mocked supabase) returns complete/ok when video passes all stages with providers=none" name="ingestVideo (unit — mocked supabase) returns complete/ok when video passes all stages with providers=none" time="0">
+    <testcase classname="ingestVideo (unit — mocked supabase) returns complete/ok when video passes all stages with providers=none" name="ingestVideo (unit — mocked supabase) returns complete/ok when video passes all stages with providers=none" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="validateBeneficiarios" errors="0" failures="0" skipped="0" timestamp="2026-03-19T20:24:38" time="0.094" tests="29">
+    <testcase classname="validateBeneficiarios passes for single beneficiario at 100%" name="validateBeneficiarios passes for single beneficiario at 100%" time="0.001">
+    </testcase>
+    <testcase classname="validateBeneficiarios passes for two beneficiarios summing to 100%" name="validateBeneficiarios passes for two beneficiarios summing to 100%" time="0.001">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when beneficiarios is empty" name="validateBeneficiarios fails when beneficiarios is empty" time="0">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when sum &lt; 100" name="validateBeneficiarios fails when sum &lt; 100" time="0.001">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when sum &gt; 100" name="validateBeneficiarios fails when sum &gt; 100" time="0">
+    </testcase>
+    <testcase classname="validateBeneficiarios allows float drift (e.g. 33.33+33.33+33.34)" name="validateBeneficiarios allows float drift (e.g. 33.33+33.33+33.34)" time="0.001">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when porcentaje is 0" name="validateBeneficiarios fails when porcentaje is 0" time="0">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when beneficiario missing nombres" name="validateBeneficiarios fails when beneficiario missing nombres" time="0">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when beneficiario missing parentesco" name="validateBeneficiarios fails when beneficiario missing parentesco" time="0.001">
+    </testcase>
+    <testcase classname="validateBeneficiarios fails when beneficiario missing fecha_nac" name="validateBeneficiarios fails when beneficiario missing fecha_nac" time="0">
+    </testcase>
+    <testcase classname="validateBeneficiarios allows multiple beneficiarios with non-round sums at 100" name="validateBeneficiarios allows multiple beneficiarios with non-round sums at 100" time="0.001">
+    </testcase>
+    <testcase classname="validateContratante passes for fully populated contratante" name="validateContratante passes for fully populated contratante" time="0">
+    </testcase>
+    <testcase classname="validateContratante fails when nombres is empty" name="validateContratante fails when nombres is empty" time="0.001">
+    </testcase>
+    <testcase classname="validateContratante fails when email is empty" name="validateContratante fails when email is empty" time="0">
+    </testcase>
+    <testcase classname="validateContratante fails when dependencia is empty" name="validateContratante fails when dependencia is empty" time="0">
+    </testcase>
+    <testcase classname="validateAsegurado — misma_persona=true passes without asegurado fields when misma_persona=true" name="validateAsegurado — misma_persona=true passes without asegurado fields when misma_persona=true" time="0.001">
+    </testcase>
+    <testcase classname="validateAsegurado — misma_persona=false fails when asegurado_nombres is empty" name="validateAsegurado — misma_persona=false fails when asegurado_nombres is empty" time="0">
+    </testcase>
+    <testcase classname="validateAsegurado — misma_persona=false passes when all asegurado fields are provided" name="validateAsegurado — misma_persona=false passes when all asegurado fields are provided" time="0.001">
+    </testcase>
+    <testcase classname="extractAsegurado — misma_persona mirror mirrors contratante fields when misma_persona=true" name="extractAsegurado — misma_persona mirror mirrors contratante fields when misma_persona=true" time="0">
+    </testcase>
+    <testcase classname="extractAsegurado — misma_persona mirror uses asegurado fields when misma_persona=false" name="extractAsegurado — misma_persona mirror uses asegurado fields when misma_persona=false" time="0">
+    </testcase>
+    <testcase classname="extractCobroInfo extracts nomina fields correctly" name="extractCobroInfo extracts nomina fields correctly" time="0">
+    </testcase>
+    <testcase classname="extractCobroInfo extracts CLABE fields correctly" name="extractCobroInfo extracts CLABE fields correctly" time="0">
+    </testcase>
+    <testcase classname="validateSolicitudEntities — end-to-end passes for a fully valid nomina solicitud" name="validateSolicitudEntities — end-to-end passes for a fully valid nomina solicitud" time="0.001">
+    </testcase>
+    <testcase classname="validateSolicitudEntities — end-to-end aggregates errors from contratante + beneficiarios" name="validateSolicitudEntities — end-to-end aggregates errors from contratante + beneficiarios" time="0">
+    </testcase>
+    <testcase classname="Constants — dropdown values PARENTESCOS has at least 5 entries" name="Constants — dropdown values PARENTESCOS has at least 5 entries" time="0">
+    </testcase>
+    <testcase classname="Constants — dropdown values PARENTESCOS includes expected values" name="Constants — dropdown values PARENTESCOS includes expected values" time="0.001">
+    </testcase>
+    <testcase classname="Constants — dropdown values ESTADOS_MX has all 32 states+CDMX (32 entries)" name="Constants — dropdown values ESTADOS_MX has all 32 states+CDMX (32 entries)" time="0">
+    </testcase>
+    <testcase classname="Constants — dropdown values ESTADOS_MX includes Ciudad de México" name="Constants — dropdown values ESTADOS_MX includes Ciudad de México" time="0">
+    </testcase>
+    <testcase classname="Constants — dropdown values DEPENDENCIAS includes IMSS, ISSSTE, SEP" name="Constants — dropdown values DEPENDENCIAS includes IMSS, ISSSTE, SEP" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="normalizeDependencia" errors="0" failures="0" skipped="0" timestamp="2026-03-19T20:24:38" time="0.056" tests="39">
+    <testcase classname="normalizeDependencia returns IMSS_ACTIVOS for &quot;IMSS&quot;" name="normalizeDependencia returns IMSS_ACTIVOS for &quot;IMSS&quot;" time="0.001">
+    </testcase>
+    <testcase classname="normalizeDependencia returns IMSS_JUBILADOS for &quot;IMSS JUBILADOS&quot;" name="normalizeDependencia returns IMSS_JUBILADOS for &quot;IMSS JUBILADOS&quot;" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia returns IMSS_JUBILADOS for &quot;IMSS JUB.&quot;" name="normalizeDependencia returns IMSS_JUBILADOS for &quot;IMSS JUB.&quot;" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia returns ISSSTE for &quot;ISSSTE&quot;" name="normalizeDependencia returns ISSSTE for &quot;ISSSTE&quot;" time="0.001">
+    </testcase>
+    <testcase classname="normalizeDependencia returns SEP for &quot;SEP&quot;" name="normalizeDependencia returns SEP for &quot;SEP&quot;" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia returns GOB_CDMX for &quot;GOBIERNO CDMX&quot;" name="normalizeDependencia returns GOB_CDMX for &quot;GOBIERNO CDMX&quot;" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia returns GOB_CDMX for &quot;CIUDAD DE MEXICO&quot;" name="normalizeDependencia returns GOB_CDMX for &quot;CIUDAD DE MEXICO&quot;" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia returns GOBIERNO for generic &quot;GOBIERNO ESTATAL&quot;" name="normalizeDependencia returns GOBIERNO for generic &quot;GOBIERNO ESTATAL&quot;" time="0.001">
+    </testcase>
+    <testcase classname="normalizeDependencia returns OTRA for unknown" name="normalizeDependencia returns OTRA for unknown" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia returns SIN_DEPENDENCIA for empty string" name="normalizeDependencia returns SIN_DEPENDENCIA for empty string" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia returns SIN_DEPENDENCIA for null" name="normalizeDependencia returns SIN_DEPENDENCIA for null" time="0">
+    </testcase>
+    <testcase classname="normalizeDependencia is case-insensitive" name="normalizeDependencia is case-insensitive" time="0.001">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina includes ine_frente" name="getDependenciaRequirements — IMSS Activos + nómina includes ine_frente" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina includes ine_reverso" name="getDependenciaRequirements — IMSS Activos + nómina includes ine_reverso" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina includes talon (nomina)" name="getDependenciaRequirements — IMSS Activos + nómina includes talon (nomina)" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina includes solicitud_p1" name="getDependenciaRequirements — IMSS Activos + nómina includes solicitud_p1" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina includes solicitud_p2" name="getDependenciaRequirements — IMSS Activos + nómina includes solicitud_p2" time="0.001">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina includes solicitud_p3" name="getDependenciaRequirements — IMSS Activos + nómina includes solicitud_p3" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina does NOT include carta_instruccion" name="getDependenciaRequirements — IMSS Activos + nómina does NOT include carta_instruccion" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina does NOT include constancia_derechohabiente" name="getDependenciaRequirements — IMSS Activos + nómina does NOT include constancia_derechohabiente" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina does NOT include clave_unica_pago" name="getDependenciaRequirements — IMSS Activos + nómina does NOT include clave_unica_pago" time="0.001">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Activos + nómina all signature docs are required" name="getDependenciaRequirements — IMSS Activos + nómina all signature docs are required" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Jubilados + nómina includes carta_instruccion (required)" name="getDependenciaRequirements — IMSS Jubilados + nómina includes carta_instruccion (required)" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Jubilados + nómina includes talon" name="getDependenciaRequirements — IMSS Jubilados + nómina includes talon" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — IMSS Jubilados + nómina includes signature docs p1-p3" name="getDependenciaRequirements — IMSS Jubilados + nómina includes signature docs p1-p3" time="0.001">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — ISSSTE + nómina includes constancia_derechohabiente (optional)" name="getDependenciaRequirements — ISSSTE + nómina includes constancia_derechohabiente (optional)" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — ISSSTE + nómina does NOT include carta_instruccion" name="getDependenciaRequirements — ISSSTE + nómina does NOT include carta_instruccion" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — SEP + nómina includes clave_unica_pago (optional)" name="getDependenciaRequirements — SEP + nómina includes clave_unica_pago (optional)" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — SEP + nómina does NOT include carta_instruccion" name="getDependenciaRequirements — SEP + nómina does NOT include carta_instruccion" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — SEP + nómina does NOT include constancia_derechohabiente" name="getDependenciaRequirements — SEP + nómina does NOT include constancia_derechohabiente" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — Gobierno CDMX + nómina includes signature docs" name="getDependenciaRequirements — Gobierno CDMX + nómina includes signature docs" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — Gobierno CDMX + nómina does NOT include carta_instruccion" name="getDependenciaRequirements — Gobierno CDMX + nómina does NOT include carta_instruccion" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — CLABE payment (no nómina) does NOT include talon when forma_cobro=clabe" name="getDependenciaRequirements — CLABE payment (no nómina) does NOT include talon when forma_cobro=clabe" time="0">
+    </testcase>
+    <testcase classname="getDependenciaRequirements — CLABE payment (no nómina) includes ine_frente and ine_reverso" name="getDependenciaRequirements — CLABE payment (no nómina) includes ine_frente and ine_reverso" time="0">
+    </testcase>
+    <testcase classname="getMissingRequiredDocs returns empty when all required docs are present for IMSS+nómina" name="getMissingRequiredDocs returns empty when all required docs are present for IMSS+nómina" time="0">
+    </testcase>
+    <testcase classname="getMissingRequiredDocs returns talon as missing when forma_cobro=nomina and talon not uploaded" name="getMissingRequiredDocs returns talon as missing when forma_cobro=nomina and talon not uploaded" time="0">
+    </testcase>
+    <testcase classname="getMissingRequiredDocs returns carta_instruccion as missing for IMSS Jubilados without it" name="getMissingRequiredDocs returns carta_instruccion as missing for IMSS Jubilados without it" time="0.001">
+    </testcase>
+    <testcase classname="getMissingRequiredDocs does NOT flag clave_unica_pago as missing for SEP (it is optional)" name="getMissingRequiredDocs does NOT flag clave_unica_pago as missing for SEP (it is optional)" time="0">
+    </testcase>
+    <testcase classname="getMissingRequiredDocs does NOT flag constancia_derechohabiente as missing for ISSSTE (it is optional)" name="getMissingRequiredDocs does NOT flag constancia_derechohabiente as missing for ISSSTE (it is optional)" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="parseSATQRUrl" errors="0" failures="0" skipped="0" timestamp="2026-03-19T20:24:38" time="0.05" tests="19">
+    <testcase classname="parseSATQRUrl parses a valid SAT QR URL" name="parseSATQRUrl parses a valid SAT QR URL" time="0.001">
+    </testcase>
+    <testcase classname="parseSATQRUrl returns null for non-SAT URL" name="parseSATQRUrl returns null for non-SAT URL" time="0.001">
+    </testcase>
+    <testcase classname="parseSATQRUrl returns null for malformed UUID" name="parseSATQRUrl returns null for malformed UUID" time="0">
+    </testcase>
+    <testcase classname="parseSATQRUrl returns null for missing required params" name="parseSATQRUrl returns null for missing required params" time="0">
+    </testcase>
+    <testcase classname="parseSATQRUrl normalizes UUID to uppercase" name="parseSATQRUrl normalizes UUID to uppercase" time="0.001">
+    </testcase>
+    <testcase classname="extractQRFromText finds a SAT QR URL embedded in OCR text" name="extractQRFromText finds a SAT QR URL embedded in OCR text" time="0">
+    </testcase>
+    <testcase classname="extractQRFromText returns null when no URL present" name="extractQRFromText returns null when no URL present" time="0.001">
+    </testcase>
+    <testcase classname="extractQRFromText returns null for empty string" name="extractQRFromText returns null for empty string" time="0">
+    </testcase>
+    <testcase classname="extractUUIDFromText extracts a bare UUID from text" name="extractUUIDFromText extracts a bare UUID from text" time="0">
+    </testcase>
+    <testcase classname="extractUUIDFromText returns null when no UUID in text" name="extractUUIDFromText returns null when no UUID in text" time="0">
+    </testcase>
+    <testcase classname="isValidCFDIUUID accepts valid UUID" name="isValidCFDIUUID accepts valid UUID" time="0.001">
+    </testcase>
+    <testcase classname="isValidCFDIUUID rejects non-UUID" name="isValidCFDIUUID rejects non-UUID" time="0">
+    </testcase>
+    <testcase classname="cfdiValidationToFinding returns null for valid status" name="cfdiValidationToFinding returns null for valid status" time="0">
+    </testcase>
+    <testcase classname="cfdiValidationToFinding returns null for skipped status" name="cfdiValidationToFinding returns null for skipped status" time="0">
+    </testcase>
+    <testcase classname="cfdiValidationToFinding returns hard stop finding for duplicate" name="cfdiValidationToFinding returns hard stop finding for duplicate" time="0.001">
+    </testcase>
+    <testcase classname="cfdiValidationToFinding returns hard stop finding for cancelled CFDI" name="cfdiValidationToFinding returns hard stop finding for cancelled CFDI" time="0">
+    </testcase>
+    <testcase classname="cfdiValidationToFinding returns flag finding for SAT unreachable" name="cfdiValidationToFinding returns flag finding for SAT unreachable" time="0">
+    </testcase>
+    <testcase classname="cfdiValidationToFinding returns flag finding for extraction_failed" name="cfdiValidationToFinding returns flag finding for extraction_failed" time="0.001">
+    </testcase>
+    <testcase classname="cfdiValidationToFinding returns flag finding for not_found" name="cfdiValidationToFinding returns flag finding for not_found" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="isHolidayMX" errors="0" failures="0" skipped="0" timestamp="2026-03-19T20:24:38" time="0.065" tests="17">
+    <testcase classname="isHolidayMX returns true for Año Nuevo 2026 (Jan 1)" name="isHolidayMX returns true for Año Nuevo 2026 (Jan 1)" time="0">
+    </testcase>
+    <testcase classname="isHolidayMX returns true for Día de la Independencia 2026 (Sep 16)" name="isHolidayMX returns true for Día de la Independencia 2026 (Sep 16)" time="0.001">
+    </testcase>
+    <testcase classname="isHolidayMX returns false for a normal Monday (Jan 5, 2026)" name="isHolidayMX returns false for a normal Monday (Jan 5, 2026)" time="0">
+    </testcase>
+    <testcase classname="isHolidayMX returns 7 holidays for 2026" name="isHolidayMX returns 7 holidays for 2026" time="0">
+    </testcase>
+    <testcase classname="isHolidayMX returns true for Constitución 2026 (Feb 2)" name="isHolidayMX returns true for Constitución 2026 (Feb 2)" time="0">
+    </testcase>
+    <testcase classname="addBusinessDays with isHolidayMX adds 5 business days from Jan 1 2026 (holiday), skipping holiday + weekend" name="addBusinessDays with isHolidayMX adds 5 business days from Jan 1 2026 (holiday), skipping holiday + weekend" time="0.001">
+    </testcase>
+    <testcase classname="addBusinessDays with isHolidayMX adds 5 business days normally when no holidays in window" name="addBusinessDays with isHolidayMX adds 5 business days normally when no holidays in window" time="0.002">
+    </testcase>
+    <testcase classname="addBusinessDays with isHolidayMX skips Constitución holiday Feb 2 2026 when in window" name="addBusinessDays with isHolidayMX skips Constitución holiday Feb 2 2026 when in window" time="0">
+    </testcase>
+    <testcase classname="deriveExpedienteState with isHolidayMX returns expediente_clean when no events" name="deriveExpedienteState with isHolidayMX returns expediente_clean when no events" time="0">
+    </testcase>
+    <testcase classname="deriveExpedienteState with isHolidayMX returns expediente_issue_open when issue is recent" name="deriveExpedienteState with isHolidayMX returns expediente_issue_open when issue is recent" time="0.001">
+    </testcase>
+    <testcase classname="deriveExpedienteState with isHolidayMX returns expediente_resolved_in_sla when COMPLETO arrives within 5 biz days" name="deriveExpedienteState with isHolidayMX returns expediente_resolved_in_sla when COMPLETO arrives within 5 biz days" time="0">
+    </testcase>
+    <testcase classname="deriveExpedienteState with isHolidayMX returns expediente_sla_breached when no COMPLETO and deadline passed" name="deriveExpedienteState with isHolidayMX returns expediente_sla_breached when no COMPLETO and deadline passed" time="0.001">
+    </testcase>
+    <testcase classname="compareFaces (no provider configured) returns skipped when no provider is set" name="compareFaces (no provider configured) returns skipped when no provider is set" time="0">
+    </testcase>
+    <testcase classname="faceMatchToFinding returns null for match verdict" name="faceMatchToFinding returns null for match verdict" time="0">
+    </testcase>
+    <testcase classname="faceMatchToFinding returns stop finding for mismatch" name="faceMatchToFinding returns stop finding for mismatch" time="0">
+    </testcase>
+    <testcase classname="faceMatchToFinding returns flag finding for inconclusive" name="faceMatchToFinding returns flag finding for inconclusive" time="0">
+    </testcase>
+    <testcase classname="faceMatchToFinding returns flag finding for skipped" name="faceMatchToFinding returns flag finding for skipped" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="deriveIntakeStatus — IMSS Activos + nómina" errors="0" failures="0" skipped="0" timestamp="2026-03-19T20:24:38" time="0.031" tests="8">
+    <testcase classname="deriveIntakeStatus — IMSS Activos + nómina returns ready_for_emision when all required docs uploaded" name="deriveIntakeStatus — IMSS Activos + nómina returns ready_for_emision when all required docs uploaded" time="0">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — IMSS Activos + nómina returns pending_verification when docs OK but video missing" name="deriveIntakeStatus — IMSS Activos + nómina returns pending_verification when docs OK but video missing" time="0.001">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — IMSS Activos + nómina returns pending_docs when talon is missing" name="deriveIntakeStatus — IMSS Activos + nómina returns pending_docs when talon is missing" time="0">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — IMSS Activos + nómina returns pending_docs when INE docs are missing" name="deriveIntakeStatus — IMSS Activos + nómina returns pending_docs when INE docs are missing" time="0.003">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — IMSS Jubilados returns pending_docs when carta_instruccion is missing" name="deriveIntakeStatus — IMSS Jubilados returns pending_docs when carta_instruccion is missing" time="0.001">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — IMSS Jubilados returns ready_for_emision when carta_instruccion is present + video" name="deriveIntakeStatus — IMSS Jubilados returns ready_for_emision when carta_instruccion is present + video" time="0">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — CLABE payment returns pending_docs when INE missing (no talon needed for CLABE)" name="deriveIntakeStatus — CLABE payment returns pending_docs when INE missing (no talon needed for CLABE)" time="0">
+    </testcase>
+    <testcase classname="deriveIntakeStatus — CLABE payment does NOT list talon as missing for CLABE payment" name="deriveIntakeStatus — CLABE payment does NOT list talon as missing for CLABE payment" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="matchFoliosByDependencia" errors="0" failures="0" skipped="0" timestamp="2026-03-19T20:24:38" time="0.034" tests="15">
+    <testcase classname="matchFoliosByDependencia returns IMSS folios for &quot;IMSS&quot; input" name="matchFoliosByDependencia returns IMSS folios for &quot;IMSS&quot; input" time="0.001">
+    </testcase>
+    <testcase classname="matchFoliosByDependencia returns ISSSTE folios for &quot;ISSSTE&quot; input" name="matchFoliosByDependencia returns ISSSTE folios for &quot;ISSSTE&quot; input" time="0">
+    </testcase>
+    <testcase classname="matchFoliosByDependencia returns SEP folios for &quot;SEP&quot; input" name="matchFoliosByDependencia returns SEP folios for &quot;SEP&quot; input" time="0.001">
+    </testcase>
+    <testcase classname="matchFoliosByDependencia returns GOB CDMX folio for &quot;CDMX&quot; input" name="matchFoliosByDependencia returns GOB CDMX folio for &quot;CDMX&quot; input" time="0">
+    </testcase>
+    <testcase classname="matchFoliosByDependencia returns empty for unknown dependencia" name="matchFoliosByDependencia returns empty for unknown dependencia" time="0">
+    </testcase>
+    <testcase classname="matchFoliosByDependencia returns empty for null/empty input" name="matchFoliosByDependencia returns empty for null/empty input" time="0">
+    </testcase>
+    <testcase classname="matchFoliosByDependencia is case-insensitive" name="matchFoliosByDependencia is case-insensitive" time="0.001">
+    </testcase>
+    <testcase classname="matchTipoContratacion returns correct rule for TC=01 (Confianza)" name="matchTipoContratacion returns correct rule for TC=01 (Confianza)" time="0">
+    </testcase>
+    <testcase classname="matchTipoContratacion returns Jub. Ant. for TC=10" name="matchTipoContratacion returns Jub. Ant. for TC=10" time="0.001">
+    </testcase>
+    <testcase classname="matchTipoContratacion returns undefined for unknown TC" name="matchTipoContratacion returns undefined for unknown TC" time="0">
+    </testcase>
+    <testcase classname="matchTipoContratacion is case-insensitive for MANDOS" name="matchTipoContratacion is case-insensitive for MANDOS" time="0">
+    </testcase>
+    <testcase classname="matchTipoContratacion all TC rules have contrato field set" name="matchTipoContratacion all TC rules have contrato field set" time="0">
+    </testcase>
+    <testcase classname="FOLIO_RULES integrity all folio rules have at least one folio" name="FOLIO_RULES integrity all folio rules have at least one folio" time="0.003">
+    </testcase>
+    <testcase classname="FOLIO_RULES integrity all folios start with N or P (GNP format)" name="FOLIO_RULES integrity all folios start with N or P (GNP format)" time="0.001">
+    </testcase>
+    <testcase classname="FOLIO_RULES integrity no duplicate folio numbers across all rules" name="FOLIO_RULES integrity no duplicate folio numbers across all rules" time="0">
+    </testcase>
+  </testsuite>
+  <testsuite name="detectAgentNameInTranscript" errors="0" failures="0" skipped="0" timestamp="2026-03-19T20:24:38" time="0.024" tests="22">
+    <testcase classname="detectAgentNameInTranscript returns true when full name is present" name="detectAgentNameInTranscript returns true when full name is present" time="0.001">
+    </testcase>
+    <testcase classname="detectAgentNameInTranscript returns true when first name only appears (partial match)" name="detectAgentNameInTranscript returns true when first name only appears (partial match)" time="0">
+    </testcase>
+    <testcase classname="detectAgentNameInTranscript returns true when name is accent-variant (STT may drop accents)" name="detectAgentNameInTranscript returns true when name is accent-variant (STT may drop accents)" time="0.001">
+    </testcase>
+    <testcase classname="detectAgentNameInTranscript returns false when name is not mentioned" name="detectAgentNameInTranscript returns false when name is not mentioned" time="0">
+    </testcase>
+    <testcase classname="detectAgentNameInTranscript returns false for empty transcript" name="detectAgentNameInTranscript returns false for empty transcript" time="0">
+    </testcase>
+    <testcase classname="detectAgentNameInTranscript returns false for empty agent name" name="detectAgentNameInTranscript returns false for empty agent name" time="0">
+    </testcase>
+    <testcase classname="detectAgentNameInTranscript ignores 2-char parts (too short for reliable match)" name="detectAgentNameInTranscript ignores 2-char parts (too short for reliable match)" time="0.001">
+    </testcase>
+    <testcase classname="agentNameFindingFromIngest returns null when transcript is not available" name="agentNameFindingFromIngest returns null when transcript is not available" time="0">
+    </testcase>
+    <testcase classname="agentNameFindingFromIngest returns null when agentName is not provided" name="agentNameFindingFromIngest returns null when agentName is not provided" time="0">
+    </testcase>
+    <testcase classname="agentNameFindingFromIngest returns stop finding when name not detected" name="agentNameFindingFromIngest returns stop finding when name not detected" time="0">
+    </testcase>
+    <testcase classname="agentNameFindingFromIngest returns info finding when name detected" name="agentNameFindingFromIngest returns info finding when name detected" time="0.001">
+    </testcase>
+    <testcase classname="assessTamperRisk returns not_evaluated when transcript is empty" name="assessTamperRisk returns not_evaluated when transcript is empty" time="0">
+    </testcase>
+    <testcase classname="assessTamperRisk returns not_evaluated when transcript is very short" name="assessTamperRisk returns not_evaluated when transcript is very short" time="0">
+    </testcase>
+    <testcase classname="assessTamperRisk returns low risk for natural conversational Spanish" name="assessTamperRisk returns low risk for natural conversational Spanish" time="0.002">
+    </testcase>
+    <testcase classname="assessTamperRisk detects transcript too short signal" name="assessTamperRisk detects transcript too short signal" time="0">
+    </testcase>
+    <testcase classname="assessTamperRisk detects missing first-person voice" name="assessTamperRisk detects missing first-person voice" time="0">
+    </testcase>
+    <testcase classname="assessTamperRisk detects date inconsistency when wrong year mentioned" name="assessTamperRisk detects date inconsistency when wrong year mentioned" time="0.001">
+    </testcase>
+    <testcase classname="assessTamperRisk returns suspicious when 2+ high/medium signals detected" name="assessTamperRisk returns suspicious when 2+ high/medium signals detected" time="0">
+    </testcase>
+    <testcase classname="tamperAssessmentToFinding returns null when risk is low" name="tamperAssessmentToFinding returns null when risk is low" time="0.001">
+    </testcase>
+    <testcase classname="tamperAssessmentToFinding returns null when not evaluated" name="tamperAssessmentToFinding returns null when not evaluated" time="0">
+    </testcase>
+    <testcase classname="tamperAssessmentToFinding returns flag finding for suspicious risk" name="tamperAssessmentToFinding returns flag finding for suspicious risk" time="0">
+    </testcase>
+    <testcase classname="tamperAssessmentToFinding returns info finding for inconclusive risk" name="tamperAssessmentToFinding returns info finding for inconclusive risk" time="0">
     </testcase>
   </testsuite>
 </testsuites>

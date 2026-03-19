@@ -408,6 +408,32 @@ export function detectVideoStatements(
 }
 
 // ──────────────────────────────────────────────────────────────
+// Agent name detection helper
+// ──────────────────────────────────────────────────────────────
+
+/**
+ * Check if an agent's name (or key parts of it) appear in the transcript.
+ * Uses fuzzy matching: checks first name and last name separately,
+ * allowing for common STT transcription variations.
+ */
+export function detectAgentNameInTranscript(transcript: string, agentName: string): boolean {
+  if (!transcript || !agentName) return false
+
+  const normalize = (s: string) =>
+    s.toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // strip accents
+      .replace(/[^a-z\s]/g, '')
+      .trim()
+
+  const normalizedTranscript = normalize(transcript)
+  const parts = normalize(agentName).split(/\s+/).filter((p) => p.length >= 3)
+
+  // At least one meaningful name part must appear
+  return parts.some((part) => normalizedTranscript.includes(part))
+}
+
+// ──────────────────────────────────────────────────────────────
 // Full pipeline: ingestVideo
 // Runs all stages in sequence, stopping at first failure.
 // ──────────────────────────────────────────────────────────────
@@ -419,6 +445,8 @@ export async function ingestVideo(
     hasExistingPolicies?: boolean
     skipTranscript?: boolean
     skipFrameExtraction?: boolean
+    /** Agent's registered name — checked against transcript when available */
+    agentName?: string
   } = {}
 ): Promise<VideoIngestResult> {
   // Stage 1: DB link
@@ -456,6 +484,13 @@ export async function ingestVideo(
   // Stage 6: Statement detection (only if transcript is available)
   if (transcript) {
     const stmtResult = detectVideoStatements(transcript, options.hasExistingPolicies ?? false)
+
+    // Agent name detection: check if options.agentName appears in transcript
+    let agentNameDetected: boolean | undefined
+    if (options.agentName) {
+      agentNameDetected = detectAgentNameInTranscript(transcript, options.agentName)
+    }
+
     return {
       stage: stmtResult.points_missing.length > 0 ? 'statement_detection' : 'complete',
       status: stmtResult.status,
@@ -464,10 +499,13 @@ export async function ingestVideo(
       frame_b64: frameb64,
       points_detected: stmtResult.points_detected,
       points_missing: stmtResult.points_missing,
+      agent_name_detected: agentNameDetected,
       evidence: {
         ...stmtResult.evidence,
         mime_type: parseResult.evidence?.mime_type,
         blob_size: parseResult.evidence?.blob_size,
+        agent_name_checked: options.agentName ?? null,
+        agent_name_detected: agentNameDetected ?? null,
       },
     }
   }
@@ -480,6 +518,65 @@ export async function ingestVideo(
     transcript,
     frame_b64: frameb64,
     evidence: parseResult.evidence,
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+// Agent name result → QualityFinding
+// ──────────────────────────────────────────────────────────────
+
+/**
+ * Generate a QualityFinding for agent name detection result.
+ * Returns null when transcript was not available (can't evaluate).
+ * Returns a 'stop' finding when name was checked but not found.
+ */
+export function agentNameFindingFromIngest(
+  result: VideoIngestResult,
+  agentName: string | null | undefined,
+  solicitudId?: string | null,
+  policyNumber?: string | null,
+  agentId?: string | null,
+  dependencia?: string | null,
+  qualityRunId?: string
+): QualityFinding | null {
+  // Only produce a finding if we had a transcript to check
+  if (!result.transcript || !agentName) return null
+  if (result.agent_name_detected === undefined) return null
+
+  if (result.agent_name_detected) {
+    // Informational — agent name confirmed
+    return {
+      quality_run_id: qualityRunId,
+      solicitud_id: solicitudId ?? null,
+      policy_number: policyNumber ?? null,
+      agent_id: agentId ?? null,
+      dependencia: dependencia ?? null,
+      category: 'seller_mismatch',
+      severity: 'info',
+      rule_code: RULE_CODES.VIDEO_AGENT_NAME_CONFIRMED,
+      status_label: 'approved_for_emision',
+      title: 'Video: nombre del agente detectado en transcripción',
+      detail: `El nombre "${agentName}" fue mencionado en el video de consentimiento.`,
+      evidence: { agent_name: agentName, agent_name_detected: true },
+      detected_at: new Date().toISOString(),
+    }
+  }
+
+  // Name was not detected in transcript
+  return {
+    quality_run_id: qualityRunId,
+    solicitud_id: solicitudId ?? null,
+    policy_number: policyNumber ?? null,
+    agent_id: agentId ?? null,
+    dependencia: dependencia ?? null,
+    category: 'seller_mismatch',
+    severity: 'stop',
+    rule_code: RULE_CODES.VIDEO_AGENT_NAME_NOT_SAID,
+    status_label: 'blocked_doc_authenticity_risk',
+    title: 'Video: nombre del agente NO mencionado en video',
+    detail: `El nombre registrado "${agentName}" no fue encontrado en la transcripción del video.`,
+    evidence: { agent_name: agentName, agent_name_detected: false },
+    detected_at: new Date().toISOString(),
   }
 }
 

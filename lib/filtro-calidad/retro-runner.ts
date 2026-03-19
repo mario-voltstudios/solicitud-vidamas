@@ -22,7 +22,9 @@ import type {
   QualityStatusLabel,
 } from './types'
 import { RULE_CODES } from './types'
-import { ingestVideo, videoIngestResultToFinding } from './video-ingest'
+import { ingestVideo, videoIngestResultToFinding, agentNameFindingFromIngest } from './video-ingest'
+import { assessTamperRisk, tamperAssessmentToFinding } from './video-tamper'
+import { compareFaces, faceMatchToFinding } from './face-match'
 import { validateCFDI, cfdiValidationToFinding } from '@/lib/cfdi'
 
 // ──────────────────────────────────────────────────────────────
@@ -289,20 +291,26 @@ async function evaluateSolicitud(
     }
   }
 
-  // -- Check: video — granular ingestion pipeline (added 2026-03-19) --
-  // Distinguishes: DB link missing | storage not found | storage error |
-  //   parse failure | transcript failure | frame failure | statement failure.
+  // -- Check: video — granular ingestion pipeline + extended verification --
+  // Stages: DB link | storage | parse | transcript | frame | statements
+  // Extended: agent name detection | tamper/AI-edit signals | face match (if frame available)
   {
     const hasExistingPolicies = sol.asegurado_tiene_otras_polizas === 'Si'
+    const agentName = (sol.nombre_agente ?? sol.clave_agente) as string | undefined
+    const submissionYear = sol.created_at
+      ? new Date(sol.created_at as string).getFullYear()
+      : new Date().getFullYear()
+
     const videoResult = await ingestVideo(
       sol.docs_video as string | null | undefined,
       supabase,
       {
         hasExistingPolicies,
-        // In retro runs we attempt transcript if provider is configured;
-        // frame extraction is skipped unless provider is set.
+        agentName,
       }
     )
+
+    // Primary video finding (storage/parse/statements)
     const videoFinding = videoIngestResultToFinding(
       videoResult,
       solId,
@@ -312,6 +320,73 @@ async function evaluateSolicitud(
       runId
     )
     if (videoFinding) findings.push(videoFinding)
+
+    // Agent name finding (only if transcript was obtained)
+    if (videoResult.transcript && agentName) {
+      const agentNameFinding = agentNameFindingFromIngest(
+        videoResult,
+        agentName,
+        solId,
+        polNum,
+        agentId,
+        dep,
+        runId
+      )
+      if (agentNameFinding) findings.push(agentNameFinding)
+    }
+
+    // Tamper / AI-edit risk assessment (text signals + optional vision)
+    if (videoResult.transcript) {
+      const tamperAssessment = await assessTamperRisk(
+        videoResult.transcript,
+        videoResult.frame_b64,
+        submissionYear
+      )
+      const tamperFinding = tamperAssessmentToFinding(
+        tamperAssessment,
+        solId,
+        polNum,
+        agentId,
+        dep,
+        runId
+      )
+      if (tamperFinding) findings.push(tamperFinding)
+    }
+
+    // Face match: INE photo vs video frame (if both available)
+    const inePhoto = (sol.docs_ine_foto ?? sol.docs_ine) as string | undefined
+    const videoFrame = videoResult.frame_b64
+    if (inePhoto && videoFrame) {
+      try {
+        const faceResult = await compareFaces(inePhoto, videoFrame)
+        const faceFinding = faceMatchToFinding(faceResult, solId, polNum ?? undefined)
+        if (faceFinding) findings.push({ ...faceFinding, quality_run_id: runId, agent_id: agentId, dependencia: dep })
+      } catch {
+        // Face match errors are non-blocking
+      }
+    } else if (videoResult.status === 'ok' && videoResult.stage === 'complete') {
+      // Video available but no frame extracted (frame provider not configured)
+      // Already handled by frame_extraction stage in videoIngestResultToFinding when frame provider = none
+      // Only add face_match inconclusive if we have INE but no frame
+      if (inePhoto && !videoFrame) {
+        const { RULE_CODES } = await import('./types')
+        findings.push({
+          quality_run_id: runId,
+          solicitud_id: solId,
+          policy_number: polNum ?? undefined,
+          agent_id: agentId,
+          dependencia: dep,
+          severity: 'flag',
+          category: 'face_match',
+          rule_code: RULE_CODES.FACE_MATCH_INCONCLUSIVE,
+          status_label: 'pending_manual_review',
+          title: 'Face match: no se pudo extraer frame — revisión manual',
+          detail: 'VIDEO_FRAME_PROVIDER no configurado. Configure ffmpeg o equivalente para habilitar face match automático.',
+          evidence: { reason: 'frame_provider_none' },
+          detected_at: new Date().toISOString(),
+        })
+      }
+    }
   }
 
   // -- Check: existing policy / reciclado --
