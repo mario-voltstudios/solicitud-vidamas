@@ -14,9 +14,16 @@ export const RULE_CODES = {
   SELLER_NAME_MISSING: 'SELLER_NAME_MISSING',
   SELLER_NAME_MISMATCH: 'SELLER_NAME_MISMATCH',
 
-  // Video completeness
-  VIDEO_MISSING: 'VIDEO_MISSING',
-  VIDEO_INCOMPLETE_POINTS: 'VIDEO_INCOMPLETE_POINTS',
+  // Video completeness — granular failure taxonomy (added 2026-03-19)
+  VIDEO_MISSING: 'VIDEO_MISSING',                           // docs_video field is null/empty in DB
+  VIDEO_DB_LINK_MISSING: 'VIDEO_DB_LINK_MISSING',           // video field populated but value is empty/whitespace
+  VIDEO_STORAGE_NOT_FOUND: 'VIDEO_STORAGE_NOT_FOUND',       // storage lookup returned 404 / object missing
+  VIDEO_STORAGE_ERROR: 'VIDEO_STORAGE_ERROR',               // storage lookup failed with unexpected error
+  VIDEO_PARSE_ERROR: 'VIDEO_PARSE_ERROR',                   // file downloaded but could not be parsed (corrupt, wrong format)
+  VIDEO_TRANSCRIPT_ERROR: 'VIDEO_TRANSCRIPT_ERROR',         // file parseable but transcription failed
+  VIDEO_FRAME_EXTRACTION_ERROR: 'VIDEO_FRAME_EXTRACTION_ERROR', // video parseable but frame extraction failed
+  VIDEO_STATEMENT_DETECTION_FAILED: 'VIDEO_STATEMENT_DETECTION_FAILED', // transcript available but required statements not detected
+  VIDEO_INCOMPLETE_POINTS: 'VIDEO_INCOMPLETE_POINTS',       // transcript available; some required points missing
 
   // Duplicate identity keys
   DUPLICATE_RFC: 'DUPLICATE_RFC',
@@ -202,6 +209,61 @@ export interface IntakeFiltroResult {
   findings: QualityFinding[]
   status_label: QualityStatusLabel
   summary_text: string
+}
+
+// ──────────────────────────────────────────────────────────────
+// Video ingestion / parse result types (added 2026-03-19)
+// ──────────────────────────────────────────────────────────────
+
+/**
+ * Stage at which video ingestion failed (or succeeded).
+ * Used in VideoIngestResult.stage and as evidence in QualityFinding.
+ */
+export type VideoIngestStage =
+  | 'db_link_check'        // checking if docs_video field has a value
+  | 'storage_lookup'       // attempting to fetch the file from Supabase Storage
+  | 'parse'                // verifying file format / decodability
+  | 'transcript'           // running transcription (Whisper / STT)
+  | 'frame_extraction'     // extracting a face-comparable frame
+  | 'statement_detection'  // checking transcript for the 7 required statements
+  | 'complete'             // all stages passed
+
+export type VideoIngestStatus =
+  | 'ok'                   // stage completed successfully
+  | 'failed'               // stage failed with an error
+  | 'skipped'              // stage was not attempted (provider not configured)
+
+export interface VideoIngestResult {
+  stage: VideoIngestStage
+  status: VideoIngestStatus
+  /** The storage path or URL that was attempted, if any */
+  storage_path?: string
+  /** Human-readable error message when status=failed */
+  error?: string
+  /** Transcription text when transcript stage succeeded */
+  transcript?: string
+  /** Base64-encoded frame when frame_extraction succeeded */
+  frame_b64?: string
+  /** Required points present in transcript (1–7) */
+  points_detected?: number[]
+  /** Required points absent from transcript */
+  points_missing?: number[]
+  /** Additional diagnostic context */
+  evidence?: Record<string, unknown>
+}
+
+/**
+ * Required video statement points (from the emission guide).
+ * Each entry maps point number → description for use in findings.
+ */
+export const VIDEO_REQUIRED_POINTS: Record<number, string> = {
+  1: 'Nombre completo del asegurado',
+  2: 'Fecha',
+  3: 'Nombre del agente/vendedor',
+  4: 'Aceptación explícita de nueva póliza GNP',
+  5: 'Monto a descontar',
+  6: 'Beneficiarios y porcentajes',
+  7: 'Declaración sobre pólizas existentes (si aplica)',
 }
 
 // ──────────────────────────────────────────────────────────────

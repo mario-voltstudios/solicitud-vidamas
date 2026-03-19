@@ -1,0 +1,249 @@
+Entidad Federativa y País de nacimiento
+Nacionalidad
+Ocupación actual
+No de identifcación fiscal y País emisor solo extranjeros
+Número de Serie del Certificado Digital de la Firma Electrónica Avanzada si cuenta con ella
+Régimen Fiscal
+Número exterior
+Número interior
+Código Postal
+Colonia
+Municipio o Alcaldía
+Entidad Federativa
+Correo electrónico
+Número exterior_2
+Número interior_2
+Código Postal_2
+Colonia_2
+Municipio o Alcaldía_2
+Entidad Federativa_2
+País_2
+Nombre de la dependencia
+Nombre de la subdependencia
+Entidad Federativa y País de nacimiento_2
+Nacionalidad_2
+Ocupación actual_2
+No de identifcación fiscal y País emisor solo extranjeros_2
+Número de Serie del Certificado Digital de la Firma Electrónica Avanzada si cuenta con ella_2
+Número exterior_3
+Número interior_3
+Código Postal_3
+Colonia_3
+Municipio o Alcaldía_3
+Entidad Federativa_3
+País_3
+Correo electrónico_2
+No_3
+No_4
+Vida Más
+Vida Más Constante
+Esencial
+Salud
+Accidentes
+Integral
+Prima excedente
+Prima total
+Vida Más Incremento a tu Medida
+Vida Más Constante Incremento a tu Medida
+Esencial_2
+Salud_2
+Accidentes_2
+Integral_2
+Ahorra Más
+Plazo del seguro
+Quincenal
+Mensual
+Anual
+Cargo a tarjeta de crédito
+Cargo a tarjeta de débito
+Misma opción de cobranza que en Vida Más
+Quincenal_2
+Mensual_2
+Anual_2
+Cargo a tarjeta de crédito_2
+Cargo a tarjeta de débito_2
+Firma del Solicitante
+Firma del Contratante
+No_5
+Firma del Solicitante_2
+Firma del Contratante_2
+Firma del Ejecutivo
+Folio del ejecutivo
+Folio del solicitud
+RFC ejecutivo
+Fecha_1
+Calle
+Calle_2
+País
+Ciudad o Población
+Ciudad o Población_2
+Fecha_2
+Primer apellido
+Primer apellido_2
+Segundo apellido_2
+Nombre (s)_2
+letras
+homoclave
+CURP
+letras_2
+homoclave_2
+CURP_2
+Calle_3
+Ciudad o Población_3
+Teléfono particular
+Extensión
+Teléfono móvil
+Teléfono particular_2
+Extensión_2
+Teléfono móvil_2
+Definir cargo y dependencia
+Definir cargo y dependencia_2
+Especifique cuáles fecha duración y estado actual
+Especifique cuáles fecha duración y estado actual_2
+Especifique cuáles fecha duración y estado actual_3
+Prima de seguro
+Suma Asegurada
+Número de Póliza Original
+Suma Asegurada Original
+Prima Original
+Prima a Incrementar
+Suma Asegurada a Incrementar
+ Prima total
+Prima de ahorro programado anual
+Suma Asegurada_2
+Fecha_3
+Parentesco5
+SA_5
+2
+3
+4
+2_2
+4_2
+Mismos Beneficiarios y porcentaje de Suma Asegurada que en Vida Más
+Parentesco1
+Parentesco2
+Parentesco3
+Parentesco4
+SA_1
+SA_2
+SA_3
+SA_4
+Parentesco1_2
+Parentesco2_2
+Parentesco3_2
+Parentesco4_2
+SA_1_2
+SA_2_2
+SA_3_2
+SA_4_2
+Fecha_2_2
+Fecha_3_2
+Fecha_4_2
+1
+5_2
+1_2
+5
+3_2
+1_3
+2_3
+3_3
+4_3
+1_4
+2_4
+3_4
+4_4
+Fecha_1_1
+Fecha_2_1
+Fecha_3_1
+Fecha_4_1
+Fecha_5_1
+Banco
+Banco_2
+Fecha_1_2
+vencimiento
+Tarjeta no
+Cuenta CLABE
+Fecha cobro
+Tarjeta no_2
+Cuenta CLABE_2
+Fecha cobro_2
+vencimiento_2
+Tipo de identificación contratante
+Entidad emisora contratante
+Folio no de identificaión contratante
+Tipo de identificación Solicitante
+Entidad emisora Solicitante
+Folio no de identificaión Solicitante
+Sí_3
+Sí_4
+Sí_5
+Nombre (s)
+Segundo apellido
+Check Box1
+Check Box2
+Check Box3
+Check Box4
+Text5
+Text6
+Text7
+Text8
+Text9
+Text10
+Text11
+Text12
+Text13
+Text14
+Text15
+Text16
+Text17
+Text18
+Text19
+Text20
+Text21
+Text22
+Text23
+Text24
+Text25
+Text26
+Text27
+Text28
+Text29
+Text30
+Text31
+Check Box33
+Check Box34
+Check Box35
+Check Box36
+Text37
+Text38
+Text39
+Text40
+Text41
+Text42
+Text43
+Text44
+Text45
+Text46
+Text47
+Text48
+Text49
+Text50
+Text51
+Text52
+Text53
+Text54
+Text55
+Text56
+Text57
+Text58
+Text59
+Text60
+Text61
+Text62
+Text63
+Text64
+Text65
+Text66
+Text67
+Signature68_es_:signer:signature
+Signature69_es_:signer:signature

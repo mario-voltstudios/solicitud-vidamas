@@ -20,6 +20,8 @@ import type {
 } from './types'
 import { RULE_CODES } from './types'
 import { compareFaces, faceMatchToFinding } from './face-match'
+import { checkVideoDbLink, videoIngestResultToFinding } from './video-ingest'
+import { validateCFDI, cfdiValidationToFinding } from '@/lib/cfdi'
 
 // ──────────────────────────────────────────────────────────────
 // Main entry point
@@ -31,16 +33,16 @@ export async function runIntakeFiltro(
 ): Promise<IntakeFiltroResult> {
   const findings: QualityFinding[] = []
 
-  // -- Rule A: Video present --
-  if (!formData.docs_video) {
-    findings.push({
-      severity: 'stop',
-      category: 'doc_authenticity',
-      rule_code: RULE_CODES.VIDEO_MISSING,
-      status_label: 'blocked_doc_authenticity_risk',
-      title: 'Video de verificación faltante',
-      detail: 'El video es obligatorio para emisión.',
-    })
+  // -- Rule A: Video present — granular DB link check (added 2026-03-19) --
+  // At intake time the file is being uploaded; we check the DB link field
+  // (docs_video) to confirm a storage path was captured. Full storage/parse/
+  // transcript checks run in the retro runner after the file is persisted.
+  {
+    const videoLinkResult = checkVideoDbLink(formData.docs_video)
+    if (videoLinkResult.status === 'failed') {
+      const videoFinding = videoIngestResultToFinding(videoLinkResult, solicitudId)
+      if (videoFinding) findings.push(videoFinding)
+    }
   }
 
   // -- Rule B: Seller/agent in video --
@@ -118,6 +120,37 @@ export async function runIntakeFiltro(
         'Esta dependencia requiere verificación de capacidad de pago en Nomipay antes de emisión.',
       evidence: { dependencia: formData.contratante_dependencia },
     })
+  }
+
+  // -- Rule F: CFDI / Talón de pago validation --
+  // If a talon doc is attached, extract the CFDI UUID via QR URL and:
+  //   a) check for duplicate UUID across other solicitudes (hard stop)
+  //   b) verify with SAT (Vigente/Cancelado/No Encontrado)
+  // This is a non-blocking gate: errors in the pipeline produce flags, not hard stops.
+  // In v1 the OCR text must be pre-extracted and passed in via formData.docs_talon_ocr_text.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fda = formData as any
+  const talonPath: string | undefined = formData.docs_talon as string | undefined
+  if (talonPath) {
+    try {
+      const cfdiResult = await validateCFDI({
+        supabase,
+        talonPath,
+        solicitudId,
+        // Pass OCR text if available (from future AI vision step)
+        ocrText: (fda.docs_talon_ocr_text as string | undefined) ?? undefined,
+      })
+      const cfdiF = cfdiValidationToFinding(
+        cfdiResult,
+        solicitudId,
+        formData.clave_agente,
+        formData.contratante_dependencia
+      )
+      if (cfdiF) findings.push(cfdiF)
+    } catch (err) {
+      // CFDI validation failure must never block submission
+      console.error('[IntakeFiltro] CFDI validation error (non-blocking):', err)
+    }
   }
 
   // -- Derive overall status --

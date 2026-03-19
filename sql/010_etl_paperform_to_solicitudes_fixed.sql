@@ -153,6 +153,67 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION pf_parse_date_parts(v_day text, v_month text, v_year text)
+RETURNS date LANGUAGE plpgsql IMMUTABLE AS $$
+DECLARE
+  d_int int;
+  m_int int;
+  y_int int;
+  m_clean text;
+BEGIN
+  IF NULLIF(trim(COALESCE(v_day, '')), '') IS NULL
+     OR NULLIF(trim(COALESCE(v_month, '')), '') IS NULL
+     OR NULLIF(trim(COALESCE(v_year, '')), '') IS NULL THEN
+    RETURN NULL;
+  END IF;
+
+  d_int := NULLIF(regexp_replace(trim(v_day), '[^0-9]', '', 'g'), '')::int;
+  y_int := NULLIF(regexp_replace(trim(v_year), '[^0-9]', '', 'g'), '')::int;
+  m_clean := lower(trim(v_month));
+
+  IF m_clean ~ '^[0-9]+$' THEN
+    m_int := m_clean::int;
+  ELSE
+    m_int := CASE m_clean
+      WHEN 'enero' THEN 1 WHEN 'ene' THEN 1
+      WHEN 'febrero' THEN 2 WHEN 'feb' THEN 2
+      WHEN 'marzo' THEN 3 WHEN 'mar' THEN 3
+      WHEN 'abril' THEN 4 WHEN 'abr' THEN 4
+      WHEN 'mayo' THEN 5 WHEN 'may' THEN 5
+      WHEN 'junio' THEN 6 WHEN 'jun' THEN 6
+      WHEN 'julio' THEN 7 WHEN 'jul' THEN 7
+      WHEN 'agosto' THEN 8 WHEN 'ago' THEN 8
+      WHEN 'septiembre' THEN 9 WHEN 'setiembre' THEN 9 WHEN 'sep' THEN 9 WHEN 'sept' THEN 9
+      WHEN 'octubre' THEN 10 WHEN 'oct' THEN 10
+      WHEN 'noviembre' THEN 11 WHEN 'nov' THEN 11
+      WHEN 'diciembre' THEN 12 WHEN 'dic' THEN 12
+      WHEN 'january' THEN 1 WHEN 'jan' THEN 1
+      WHEN 'february' THEN 2
+      WHEN 'march' THEN 3
+      WHEN 'april' THEN 4
+      WHEN 'june' THEN 6
+      WHEN 'july' THEN 7
+      WHEN 'august' THEN 8
+      WHEN 'september' THEN 9
+      WHEN 'october' THEN 10
+      WHEN 'november' THEN 11
+      WHEN 'december' THEN 12
+      ELSE NULL
+    END;
+  END IF;
+
+  IF d_int IS NULL OR m_int IS NULL OR y_int IS NULL THEN
+    RETURN NULL;
+  END IF;
+
+  BEGIN
+    RETURN make_date(y_int, m_int, d_int);
+  EXCEPTION WHEN others THEN
+    RETURN NULL;
+  END;
+END;
+$$;
+
 -- ----------------------------------------------------------
 -- 4. Full ETL function: migrate one solicitudes_paperform row
 --    into solicitudes + solicitud_beneficiarios + solicitud_documentos
@@ -276,7 +337,7 @@ BEGIN
       status, created_at
     ) VALUES (
       -- Agente
-      v_folio, v_pf.clave_agente, 'paperform_migration', p_paperform_id,
+      v_folio, COALESCE(NULLIF(v_pf.clave_agente, ''), NULLIF(split_part(v_folio, '-', 1), '')), 'paperform_migration', p_paperform_id,
       v_data->>'9n7b5', v_data->>'4eaif', v_data->>'eib9f',
       -- Fecha firma
       v_data->>'d81e7', v_data->>'6drpc', v_data->>'b4miu',
@@ -284,7 +345,7 @@ BEGIN
       v_data->>'8pgv', v_data->>'6qjgc',
       -- Contratante identidad
       v_data->>'3ebnv', v_data->>'901ai', v_data->>'59hqo',
-      NULLIF(CONCAT_WS('-', NULLIF(v_data->>'d5ecc',''), NULLIF(v_data->>'admv',''), NULLIF(v_data->>'2n6kk','')), '--')::date,
+      pf_parse_date_parts(v_data->>'d5ecc', v_data->>'admv', v_data->>'2n6kk'),
       v_data->>'8k8li', v_data->>'124v1', v_pf.curp,
       v_data->>'ahae4', v_data->>'1nibg',
       v_data->>'7f78b', v_data->>'22bkq',
@@ -310,9 +371,9 @@ BEGIN
       CASE WHEN v_misma THEN v_data->>'901ai' ELSE v_data->>'1gvae' END,
       CASE WHEN v_misma THEN v_data->>'59hqo' ELSE v_data->>'3aqg8' END,
       CASE WHEN v_misma THEN
-        NULLIF(CONCAT_WS('-', NULLIF(v_data->>'d5ecc',''), NULLIF(v_data->>'admv',''), NULLIF(v_data->>'2n6kk','')), '--')::date
+        pf_parse_date_parts(v_data->>'d5ecc', v_data->>'admv', v_data->>'2n6kk')
       ELSE
-        NULLIF(CONCAT_WS('-', NULLIF(v_data->>'4kqgs',''), NULLIF(v_data->>'6s7ed',''), NULLIF(v_data->>'5tfr2','')), '')::date
+        pf_parse_date_parts(v_data->>'4kqgs', v_data->>'6s7ed', v_data->>'5tfr2')
       END,
       CASE WHEN v_misma THEN v_data->>'8k8li' ELSE v_data->>'ep46p' END,
       CASE WHEN v_misma THEN v_data->>'124v1' ELSE v_data->>'dkgeo' END, -- ✅ asegurado_rfc
@@ -351,7 +412,7 @@ BEGIN
     IF v_pf.beneficiario_nombre IS NOT NULL THEN
       INSERT INTO solicitud_beneficiarios (solicitud_id, nombres, ap_paterno, ap_materno, parentesco, porcentaje)
       VALUES (v_sol_id, v_pf.beneficiario_nombre, COALESCE(v_pf.beneficiario_apellido1, ''),
-              COALESCE(v_pf.beneficiario_apellido2, ''), v_pf.beneficiario_parentesco,
+              COALESCE(v_pf.beneficiario_apellido2, ''), COALESCE(v_pf.beneficiario_parentesco, 'No especificado'),
               CASE
                 WHEN v_pf.beneficiario2_nombre IS NOT NULL AND v_pf.beneficiario3_nombre IS NOT NULL THEN 34
                 WHEN v_pf.beneficiario2_nombre IS NOT NULL THEN 50
@@ -363,7 +424,7 @@ BEGIN
     IF v_pf.beneficiario2_nombre IS NOT NULL THEN
       INSERT INTO solicitud_beneficiarios (solicitud_id, nombres, ap_paterno, ap_materno, parentesco, porcentaje)
       VALUES (v_sol_id, v_pf.beneficiario2_nombre, COALESCE(v_pf.beneficiario2_apellido1, ''),
-              COALESCE(v_pf.beneficiario2_apellido2, ''), v_pf.beneficiario2_parentesco,
+              COALESCE(v_pf.beneficiario2_apellido2, ''), COALESCE(v_pf.beneficiario2_parentesco, 'No especificado'),
               CASE
                 WHEN v_pf.beneficiario3_nombre IS NOT NULL THEN 33
                 ELSE 50
@@ -374,7 +435,7 @@ BEGIN
     IF v_pf.beneficiario3_nombre IS NOT NULL THEN
       INSERT INTO solicitud_beneficiarios (solicitud_id, nombres, ap_paterno, ap_materno, parentesco, porcentaje)
       VALUES (v_sol_id, v_pf.beneficiario3_nombre, COALESCE(v_pf.beneficiario3_apellido1, ''),
-              COALESCE(v_pf.beneficiario3_apellido2, ''), v_pf.beneficiario3_parentesco, 33)
+              COALESCE(v_pf.beneficiario3_apellido2, ''), COALESCE(v_pf.beneficiario3_parentesco, 'No especificado'), 33)
       ON CONFLICT DO NOTHING;
     END IF;
 
@@ -399,6 +460,7 @@ BEGIN
       v_sol_id,
       d.doc_type,
       'paperform_migration',
+      'paperform-migration/' || v_sol_id::text || '/' || d.doc_type || '/' || md5(d.url),
       d.url,
       'uploaded',
       COALESCE(v_pf.created_at, now()),

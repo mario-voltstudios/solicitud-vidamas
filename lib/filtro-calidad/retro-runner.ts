@@ -22,6 +22,8 @@ import type {
   QualityStatusLabel,
 } from './types'
 import { RULE_CODES } from './types'
+import { ingestVideo, videoIngestResultToFinding } from './video-ingest'
+import { validateCFDI, cfdiValidationToFinding } from '@/lib/cfdi'
 
 // ──────────────────────────────────────────────────────────────
 // Main entry: run retro/on-demand scan
@@ -100,12 +102,67 @@ export async function runRetroFiltro(
 // Scope → DB query
 // ──────────────────────────────────────────────────────────────
 async function fetchSolicitudesForScope(scope: RunScope, supabase: SupabaseClient) {
+  if (scope.type === 'policy') {
+    const { data: polizas, error: polizasError } = await supabase
+      .from('polizas')
+      .select('solicitud_id, num_poliza')
+      .in('num_poliza', scope.policy_numbers ?? [])
+
+    if (polizasError) throw new Error(`Policy scope query failed: ${polizasError.message}`)
+
+    const pairs = (polizas ?? [])
+      .filter((row) => row.solicitud_id && row.num_poliza)
+      .map((row) => ({ solicitud_id: row.solicitud_id as string, policy_number: row.num_poliza as string }))
+
+    if (pairs.length) {
+      const solicitudIds = [...new Set(pairs.map((row) => row.solicitud_id))]
+      const { data: solicitudes, error: solicitudesError } = await supabase
+        .from('solicitudes')
+        .select('*')
+        .in('id', solicitudIds)
+
+      if (solicitudesError) throw new Error(`Scope query failed: ${solicitudesError.message}`)
+
+      const policyBySolicitud = new Map(pairs.map((row) => [row.solicitud_id, row.policy_number]))
+      return (solicitudes ?? []).map((sol) => ({
+        ...sol,
+        policy_number: policyBySolicitud.get(sol.id as string) ?? null,
+      }))
+    }
+
+    const { data: attributed, error: attributedError } = await supabase
+      .from('policy_attribution')
+      .select('numero_poliza, folio_v2')
+      .in('numero_poliza', scope.policy_numbers ?? [])
+      .not('folio_v2', 'is', null)
+
+    if (attributedError) throw new Error(`Policy attribution fallback failed: ${attributedError.message}`)
+
+    const byFolio = new Map(
+      (attributed ?? [])
+        .filter((row) => row.folio_v2 && row.numero_poliza)
+        .map((row) => [row.folio_v2 as string, String(row.numero_poliza)])
+    )
+
+    const folios = [...byFolio.keys()]
+    if (!folios.length) return []
+
+    const { data: solicitudes, error: solicitudesError } = await supabase
+      .from('solicitudes')
+      .select('*')
+      .in('folio', folios)
+
+    if (solicitudesError) throw new Error(`Policy attribution scope query failed: ${solicitudesError.message}`)
+
+    return (solicitudes ?? []).map((sol) => ({
+      ...sol,
+      policy_number: byFolio.get(sol.folio as string) ?? null,
+    }))
+  }
+
   let q = supabase.from('solicitudes').select('*')
 
   switch (scope.type) {
-    case 'policy':
-      q = q.in('policy_number', scope.policy_numbers ?? [])
-      break
     case 'folio':
       q = q.eq('folio', scope.folio)
       break
@@ -149,7 +206,7 @@ async function evaluateSolicitud(
   sol: Record<string, unknown>,
   emailEvents: Record<string, unknown>[],
   runId: string,
-  _supabase: SupabaseClient
+  supabase: SupabaseClient
 ): Promise<QualityFinding[]> {
   const findings: QualityFinding[] = []
   const polNum = sol.policy_number as string | null
@@ -232,21 +289,29 @@ async function evaluateSolicitud(
     }
   }
 
-  // -- Check: video absent (retro) --
-  if (!sol.docs_video) {
-    findings.push({
-      quality_run_id: runId,
-      solicitud_id: solId,
-      policy_number: polNum ?? undefined,
-      agent_id: agentId,
-      dependencia: dep,
-      severity: 'stop',
-      category: 'doc_authenticity',
-      rule_code: RULE_CODES.VIDEO_MISSING,
-      status_label: 'blocked_doc_authenticity_risk',
-      title: 'Video de verificación faltante',
-      detail: 'No se encontró video en esta solicitud.',
-    })
+  // -- Check: video — granular ingestion pipeline (added 2026-03-19) --
+  // Distinguishes: DB link missing | storage not found | storage error |
+  //   parse failure | transcript failure | frame failure | statement failure.
+  {
+    const hasExistingPolicies = sol.asegurado_tiene_otras_polizas === 'Si'
+    const videoResult = await ingestVideo(
+      sol.docs_video as string | null | undefined,
+      supabase,
+      {
+        hasExistingPolicies,
+        // In retro runs we attempt transcript if provider is configured;
+        // frame extraction is skipped unless provider is set.
+      }
+    )
+    const videoFinding = videoIngestResultToFinding(
+      videoResult,
+      solId,
+      polNum,
+      agentId,
+      dep,
+      runId
+    )
+    if (videoFinding) findings.push(videoFinding)
   }
 
   // -- Check: existing policy / reciclado --
@@ -264,6 +329,28 @@ async function evaluateSolicitud(
       title: 'Asegurado declaró tener pólizas — verificar consentimiento en video',
       detail: 'Campo asegurado_tiene_otras_polizas = Si. Requiere revisión de video para confirmar consentimiento.',
     })
+  }
+
+  // -- Check: CFDI / Talón de pago --
+  // Try to decode the talon document natively (native QR decode wired in validate-cfdi.ts).
+  // Checks: (1) duplicate UUID, (2) SAT status (Vigente/Cancelado/No Encontrado)
+  // Non-blocking: errors produce flags, not hard stops.
+  const talonPath = (sol.docs_talon ?? sol.url_tarjeton) as string | undefined
+  if (talonPath) {
+    try {
+      const cfdiResult = await validateCFDI({
+        supabase,
+        talonPath,
+        solicitudId: solId,
+        qualityRunId: runId,
+        // No ocrText — native QR decode will be attempted
+      })
+      const cfdiF = cfdiValidationToFinding(cfdiResult, solId, agentId, dep)
+      if (cfdiF) findings.push({ ...cfdiF, quality_run_id: runId, policy_number: polNum ?? undefined })
+    } catch (err) {
+      // CFDI errors must never fail the overall run
+      console.error('[RetroRunner] CFDI validation error (non-blocking):', err)
+    }
   }
 
   return findings
