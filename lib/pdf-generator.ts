@@ -29,6 +29,11 @@ function splitDate(value?: string | null) {
   return { dd, mm, yyyy }
 }
 
+function getOptionalField(obj: unknown, key: string) {
+  if (!obj || typeof obj !== 'object') return ''
+  const value = (obj as Record<string, unknown>)[key]
+  return value == null ? '' : String(value)
+}
 
 function setTextField(form: ReturnType<typeof PDFDocument.prototype.getForm>, fieldName: string, value: MaybeString) {
   try {
@@ -91,6 +96,7 @@ export async function buildSolicitudPdf(fd: FormData) {
   const contratanteDob = splitDate(fd.contratante_fecha_nac)
   const aseguradoDob = splitDate(fd.asegurado_fecha_nac)
   const fechaCobro = splitDate(fd.fecha_inicio_cobro)
+  const aseguradoCurp = getOptionalField(fd, 'asegurado_curp')
 
   // Page 1 — Contratante
   setTextField(form, 'Folio del solicitud', upper(fd.folio))
@@ -134,7 +140,9 @@ export async function buildSolicitudPdf(fd: FormData) {
     setTextField(form, 'Fecha_2', aseguradoDob.dd)
     setTextField(form, 'Fecha_2_1', aseguradoDob.mm)
     setTextField(form, 'Fecha_2_2', aseguradoDob.yyyy)
-    setTextField(form, 'CURP_2', upper(fd.asegurado_rfc))
+    // Never write RFC into the CURP field. If asegurado_curp is not yet captured,
+    // leave the field blank rather than injecting incorrect identity data.
+    setTextField(form, 'CURP_2', upper(aseguradoCurp))
     setTextField(form, 'homoclave_2', last3(fd.asegurado_rfc))
     setCheckbox(form, 'Check Box3', upper(fd.asegurado_genero) === 'M')
     setCheckbox(form, 'Check Box4', upper(fd.asegurado_genero) === 'F')
@@ -157,8 +165,9 @@ export async function buildSolicitudPdf(fd: FormData) {
   }
 
   // Page 2 — Product / Plan / Cobro
-  setCheckbox(form, 'Vida Más', true)
-  setCheckbox(form, 'Vida Más Constante', false)
+  // Per current Vida Más workflow/spec, the product is Vida Más Constante.
+  setCheckbox(form, 'Vida Más', false)
+  setCheckbox(form, 'Vida Más Constante', true)
   setCheckbox(form, 'Integral', upper(fd.plan) === 'INTEGRAL')
   setCheckbox(form, 'SALUD', upper(fd.plan) === 'SALUD')
   setCheckbox(form, 'Salud', upper(fd.plan) === 'SALUD')
@@ -324,7 +333,10 @@ export async function generateAndStoreSolicitudPdf(solicitudId: string) {
       upload_state: 'uploaded',
       upload_at: new Date().toISOString(),
       ocr_state: 'skipped',
-      backup_state: 'pending',
+      // Generated PDFs live in primary Supabase Storage; Drive backup is not part of
+      // this generator path, so do not leave them permanently pending.
+      backup_state: 'skipped',
+      backup_error: 'Drive backup not applicable for generated PDF route',
       is_latest: true,
       created_by: fd.clave_agente || 'pdf_generator',
     })

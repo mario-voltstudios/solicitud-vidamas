@@ -329,7 +329,7 @@ export async function submitSolicitud(formData: FormData) {
   )
 
   // 3. Google Drive file backup — collect all docs_ fields from formData
-  const driveDocs: Record<string, string> = {}
+  const driveDocs: Array<{ docType: string; storagePath: string }> = []
   const docKeys = [
     'ine_frente', 'ine_reverso', 'talon',
     'carta_instruccion', 'constancia_derechohabiente', 'clave_unica_pago',
@@ -341,10 +341,10 @@ export async function submitSolicitud(formData: FormData) {
   const fd = formData as any
   for (const key of docKeys) {
     const path = fd[`docs_${key}`]
-    if (path) driveDocs[key] = path
+    if (path) driveDocs.push({ docType: key, storagePath: path })
   }
-  if (Object.keys(driveDocs).length > 0) {
-    backupFilesToDrive(data.folio, driveDocs).catch((err) =>
+  if (driveDocs.length > 0) {
+    backupFilesToDrive(data.id, data.folio, driveDocs).catch((err) =>
       console.error('[Backup] Google Drive failed:', err)
     )
   }

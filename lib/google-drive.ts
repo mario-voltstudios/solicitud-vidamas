@@ -6,6 +6,11 @@ import { createServerClient } from '@/lib/supabase'
 const DRIVE_ROOT_FOLDER_ID = '1vb0c_2rwdNum24KWmexqhdiDuiBwVRQe'
 const BUCKET = 'solicitud-docs'
 
+export interface DriveBackupDoc {
+  docType: string
+  storagePath: string
+}
+
 function getDriveClient() {
   const saJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON
   if (!saJson) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON env var not set')
@@ -51,6 +56,37 @@ async function findOrCreateFolder(
   return folder.data.id!
 }
 
+async function markBackupResult(
+  solicitudId: string,
+  docType: string,
+  storagePath: string,
+  patch: {
+    backup_state: 'done' | 'failed'
+    backup_drive_id?: string | null
+    backup_error?: string | null
+    backup_at?: string | null
+  }
+) {
+  const supabase = createServerClient()
+
+  const { error } = await supabase
+    .from('solicitud_documentos')
+    .update({
+      backup_state: patch.backup_state,
+      backup_drive_id: patch.backup_drive_id ?? null,
+      backup_error: patch.backup_error ?? null,
+      backup_at: patch.backup_at ?? null,
+    })
+    .eq('solicitud_id', solicitudId)
+    .eq('doc_type', docType)
+    .eq('storage_path', storagePath)
+    .eq('is_latest', true)
+
+  if (error) {
+    console.error(`[Drive] Failed to mark backup state for ${docType} (${storagePath}):`, error)
+  }
+}
+
 function docKeyToFilename(docKey: string, filePath: string): string {
   // Extract extension from the stored path
   const ext = filePath.split('.').pop() || 'jpg'
@@ -72,10 +108,11 @@ function docKeyToFilename(docKey: string, filePath: string): string {
 }
 
 export async function backupFilesToDrive(
+  solicitudId: string,
   folio: string,
-  docs: Record<string, string> // docKey -> supabase storage path
+  docs: DriveBackupDoc[]
 ): Promise<void> {
-  if (!docs || Object.keys(docs).length === 0) {
+  if (!docs || docs.length === 0) {
     console.log('[Drive] No files to backup')
     return
   }
@@ -83,19 +120,39 @@ export async function backupFilesToDrive(
   const drive = getDriveClient()
   const supabase = createServerClient()
 
-  // Create subfolder for this folio
-  const folioFolderId = await findOrCreateFolder(drive, folio, DRIVE_ROOT_FOLDER_ID)
-  console.log(`[Drive] Folio folder created/found: ${folioFolderId}`)
+  let folioFolderId = ''
+  try {
+    folioFolderId = await findOrCreateFolder(drive, folio, DRIVE_ROOT_FOLDER_ID)
+    console.log(`[Drive] Folio folder created/found: ${folioFolderId}`)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error(`[Drive] Failed to prepare folio folder for ${folio}:`, err)
+    await Promise.all(
+      docs.map((doc) =>
+        markBackupResult(solicitudId, doc.docType, doc.storagePath, {
+          backup_state: 'failed',
+          backup_error: `Drive folder setup failed: ${message}`,
+        })
+      )
+    )
+    throw err
+  }
 
   // Upload each file
-  for (const [docKey, storagePath] of Object.entries(docs)) {
+  for (const doc of docs) {
+    const { docType, storagePath } = doc
     if (!storagePath) continue
 
     try {
       // Download from Supabase Storage
       const { data: blob, error } = await supabase.storage.from(BUCKET).download(storagePath)
       if (error || !blob) {
+        const message = error?.message || `Blob missing for ${storagePath}`
         console.error(`[Drive] Failed to download ${storagePath}:`, error)
+        await markBackupResult(solicitudId, docType, storagePath, {
+          backup_state: 'failed',
+          backup_error: message,
+        })
         continue
       }
 
@@ -103,14 +160,14 @@ export async function backupFilesToDrive(
       const arrayBuffer = await blob.arrayBuffer()
       const buffer = Buffer.from(arrayBuffer)
 
-      const filename = docKeyToFilename(docKey, storagePath)
+      const filename = docKeyToFilename(docType, storagePath)
       const mimeType = blob.type || (storagePath.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg')
 
       // Upload to Drive
       const { Readable } = await import('stream')
       const stream = Readable.from(buffer)
 
-      await drive.files.create({
+      const upload = await drive.files.create({
         requestBody: {
           name: filename,
           parents: [folioFolderId],
@@ -122,9 +179,21 @@ export async function backupFilesToDrive(
         fields: 'id,name',
       })
 
+      await markBackupResult(solicitudId, docType, storagePath, {
+        backup_state: 'done',
+        backup_drive_id: upload.data.id || null,
+        backup_error: null,
+        backup_at: new Date().toISOString(),
+      })
+
       console.log(`[Drive] Uploaded ${filename} to folio folder`)
     } catch (err) {
-      console.error(`[Drive] Error uploading ${docKey}:`, err)
+      const message = err instanceof Error ? err.message : String(err)
+      console.error(`[Drive] Error uploading ${docType}:`, err)
+      await markBackupResult(solicitudId, docType, storagePath, {
+        backup_state: 'failed',
+        backup_error: message,
+      })
     }
   }
 
