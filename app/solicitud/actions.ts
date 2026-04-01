@@ -6,8 +6,7 @@ import { anthropic } from '@ai-sdk/anthropic'
 import { generateObject } from 'ai'
 import { z } from 'zod'
 import { appendToSheet } from '@/lib/google-sheets'
-// REMOVED: Airtable write — migrated to Supabase (2026-04-01)
-// import { createAirtableRecord } from '@/lib/airtable'
+
 import { backupFilesToDrive } from '@/lib/google-drive'
 import { getUploadedDocs } from '@/lib/dependencia-rules'
 import { deriveIntakeStatus } from '@/lib/intake-status'
@@ -324,13 +323,7 @@ export async function submitSolicitud(formData: FormData) {
     console.error('[Backup] Google Sheets failed:', err)
   )
 
-  // 2. Airtable backup — REMOVED (2026-04-01, Airtable migration)
-  // Supabase is now the canonical source. Airtable write was summary-only (6 fields).
-  // createAirtableRecord(backupData).catch((err) =>
-  //   console.error('[Backup] Airtable failed:', err)
-  // )
-
-  // 3. Google Drive file backup — collect all docs_ fields from formData
+  // 2. Google Drive file backup — collect all docs_ fields from formData
   const driveDocs: Array<{ docType: string; storagePath: string }> = []
   const docKeys = [
     'ine_frente', 'ine_reverso', 'talon',

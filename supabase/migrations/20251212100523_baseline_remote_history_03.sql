@@ -1,0 +1,10 @@
+-- Baseline placeholder for remote Supabase migration history
+-- Version: 20251212100523
+-- Purpose: this migration already exists in the hosted ASTRO project
+-- and is represented here so Supabase CLI can reconcile local history
+-- against the pre-existing remote migration table.
+--
+-- IMPORTANT:
+-- - Do not add SQL here retroactively.
+-- - Structural deltas discovered after baselineing must go in a NEW migration.
+-- - Remote inventory/reconciliation docs live under supabase/reconciliation/.

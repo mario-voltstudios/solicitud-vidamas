@@ -1,6 +1,6 @@
 # Solicitud VidaMás — Intake Form
 
-Next.js wizard for capturing VidaMás insurance applications (solicitudes). Submits to Supabase with fire-and-forget backups to Google Sheets, Airtable, and Google Drive.
+Next.js wizard for capturing VidaMás insurance applications (solicitudes). Submits to Supabase with fire-and-forget backups to Google Sheets and Google Drive.
 
 ---
 
@@ -41,19 +41,44 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ### Database Migrations
 
-Apply these SQL files to Supabase **in order**:
+**Source of truth:** `supabase/migrations/`
+
+ASTRO now follows the standard Supabase migration pattern already used in other repos. Historical SQL from `sql/` has been mirrored into `supabase/migrations/` so schema changes can be tracked consistently in Git.
+
+Legacy files still present for readability/reference:
 
 ```
 sql/001_solicitudes_normalized.sql   — beneficiarios normalization + back-fill
 sql/002_poliza_reconciliation.sql    — polizas + reconciliation_checks tables
 sql/003_recibos_lifecycle.sql        — recibos lifecycle model + views
-sql/004_solicitud_documentos.sql     — document tracking table (NEW)
-sql/005_solicitud_status_history.sql — append-only status audit log (NEW)
-sql/006_agentes_schema.sql           — agentes table formalization (NEW)
-sql/007_solicitudes_minor_gaps.sql   — minor column gaps: base_calculo, nombre_agente, week/year (NEW)
+sql/004_solicitud_documentos.sql     — document tracking table
+sql/005_solicitud_status_history.sql — append-only status audit log
+sql/006_agentes_schema.sql           — agentes table formalization
+sql/007_solicitudes_minor_gaps.sql   — minor column gaps: base_calculo, nombre_agente, week/year
 ```
 
-See [DOMAIN_MODEL.md](./DOMAIN_MODEL.md#migration-files) for the full schema overview.
+For bulk updates / deletes / backfills, use `supabase/data-fixes/` with backup/apply/restore/verify artifacts.
+
+See:
+- [supabase/README.md](./supabase/README.md)
+- [supabase/CHANGE_SAFETY.md](./supabase/CHANGE_SAFETY.md)
+- [supabase/reconciliation/README.md](./supabase/reconciliation/README.md)
+- [DOMAIN_MODEL.md](./DOMAIN_MODEL.md#migration-files)
+
+### Operational DB workflow
+
+From the repo root:
+
+```bash
+npm run db:project-ref
+npm run db:link
+export SUPABASE_DB_URL=<remote connection string>
+npm run db:pull:remote
+npm run db:reconcile
+npm run db:new-migration -- <change_slug>
+```
+
+This is the path for the next structural ASTRO DB change. Bulk corrections still go through `supabase/data-fixes/`.
 
 ---
 
@@ -66,7 +91,5 @@ NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 SUPABASE_SECRET_KEY
 GOOGLE_SERVICE_ACCOUNT_JSON
-AIRTABLE_TOKEN
-AIRTABLE_BASE_ID
 ANTHROPIC_API_KEY
 ```

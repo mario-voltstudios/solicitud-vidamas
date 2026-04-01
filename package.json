@@ -9,7 +9,13 @@
     "lint": "eslint",
     "qa": "jest --config qa/jest.config.js --forceExit",
     "qa:coverage": "jest --config qa/jest.config.js --coverage --forceExit",
-    "qa:ci": "jest --config qa/jest.config.js --forceExit --ci --json --outputFile=qa/artifacts/jest-results-latest.json"
+    "qa:ci": "jest --config qa/jest.config.js --forceExit --ci --json --outputFile=qa/artifacts/jest-results-latest.json",
+    "db:project-ref": "node scripts/supabase-project-ref.cjs print",
+    "db:link": "node scripts/supabase-project-ref.cjs link",
+    "db:pull:remote": "python3 scripts/export-remote-schema-inventory.py supabase/reconciliation/remote-inventory.json",
+    "db:reconcile": "node scripts/reconcile-schema-baseline.cjs",
+    "db:new-migration": "supabase migration new",
+    "db:new-data-fix": "node scripts/new-data-fix.cjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.46",

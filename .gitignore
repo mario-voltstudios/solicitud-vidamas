@@ -29,6 +29,11 @@ yarn-error.log*
 .env.local
 .env*.local
 .env
+supabase/reconciliation/remote-schema.sql
+supabase/reconciliation/remote-inventory.json
+supabase/reconciliation/latest-summary.json
+supabase/reconciliation/latest-summary.md
+supabase/.temp/
 
 # vercel
 .vercel
