@@ -62,6 +62,9 @@ export default function StepCobro({ formData, setFormData, onNext, onBack }: Ste
     if (formData.forma_cobro === 'nomina') {
       if (!formData.contratante_dependencia) newErrors.contratante_dependencia = 'Requerido'
       if (!formData.matricula) newErrors.matricula = 'Requerido'
+      if (formData.contratante_dependencia && formData.contratante_dependencia.toUpperCase().includes('IMSS') && !formData.imss_tipo) {
+        newErrors.imss_tipo = 'Selecciona si el asegurado es activo o jubilado'
+      }
     }
     if (formData.forma_cobro === 'clabe') {
       if (!formData.clabe) newErrors.clabe = 'Requerido'
@@ -202,6 +205,66 @@ export default function StepCobro({ formData, setFormData, onNext, onBack }: Ste
                 </div>
               )}
             </div>
+
+            {/* IMSS Activo / Jubilado selector */}
+            {formData.contratante_dependencia && formData.contratante_dependencia.toUpperCase().includes('IMSS') && (
+              <div>
+                <Label className="text-base font-medium">¿El asegurado es trabajador activo o jubilado? *</Label>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      update('imss_tipo', 'ACTIVO')
+                      // Update dependencia to remove JUBILADO if present
+                      if (formData.contratante_dependencia.toUpperCase().includes('JUBILADO')) {
+                        setFormData({
+                          imss_tipo: 'ACTIVO',
+                          contratante_dependencia: formData.contratante_dependencia.replace(/[\s-]*JUBILAD[OA]S?/gi, '').trim(),
+                        })
+                      }
+                    }}
+                    className={`p-3 rounded-xl border-2 text-left transition-all ${
+                      formData.imss_tipo === 'ACTIVO'
+                        ? 'border-[#003087] bg-blue-50'
+                        : 'border-gray-200 bg-white'
+                    }`}
+                  >
+                    <div className="text-lg mb-1">👷</div>
+                    <div className="font-semibold text-sm">Activo</div>
+                    <div className="text-xs text-gray-500">Trabajador en activo</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      update('imss_tipo', 'JUBILADO')
+                      // Update dependencia to include JUBILADO
+                      if (!formData.contratante_dependencia.toUpperCase().includes('JUBILADO')) {
+                        setFormData({
+                          imss_tipo: 'JUBILADO',
+                          contratante_dependencia: formData.contratante_dependencia + ' Jubilados',
+                        })
+                      }
+                    }}
+                    className={`p-3 rounded-xl border-2 text-left transition-all ${
+                      formData.imss_tipo === 'JUBILADO'
+                        ? 'border-[#003087] bg-blue-50'
+                        : 'border-gray-200 bg-white'
+                    }`}
+                  >
+                    <div className="text-lg mb-1">👴</div>
+                    <div className="font-semibold text-sm">Jubilado</div>
+                    <div className="text-xs text-gray-500">Pensionado / jubilado</div>
+                  </button>
+                </div>
+                {errors.imss_tipo && <p className={errorClass}>{errors.imss_tipo}</p>}
+
+                {formData.imss_tipo === 'JUBILADO' && (
+                  <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-sm font-medium text-blue-900">ℹ️ Para IMSS Jubilados se requiere carta de instrucción adicional</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Docs needed for nómina */}
             {formData.contratante_dependencia && (

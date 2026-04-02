@@ -240,6 +240,7 @@ export async function submitSolicitud(formData: FormData) {
     clabe: formData.clabe || null,
     banco: formData.banco || null,
     fecha_inicio_cobro: formData.fecha_inicio_cobro || null,
+    imss_tipo: formData.imss_tipo || null,
     // asegurado
     misma_persona: formData.misma_persona,
     asegurado_nombres: formData.misma_persona ? formData.contratante_nombres : formData.asegurado_nombres || null,

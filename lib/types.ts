@@ -131,6 +131,9 @@ export interface FormData {
   // Step 1: Agente
   clave_agente: string
   nombre_agente: string
+  correo_agente?: string   // From magic token / agentes table
+  rfc_ejecutivo?: string   // From magic token / agentes table
+  tiene_cedula?: string | boolean // From magic token / agentes table
   folio: string
   semana_id?: number
   week_number?: number
@@ -168,6 +171,7 @@ export interface FormData {
   clabe: string
   banco: string
   fecha_inicio_cobro: string
+  imss_tipo?: 'ACTIVO' | 'JUBILADO' | null  // Only relevant when dependencia = IMSS
 
   // Step 2: Contratante — extra fields added 2026-03-16
   contratante_lugar_nacimiento: string
@@ -470,6 +474,9 @@ export function validateSolicitudEntities(fd: FormData): ValidationResult {
 export const INITIAL_FORM_DATA: FormData = {
   clave_agente: '',
   nombre_agente: '',
+  correo_agente: '',
+  rfc_ejecutivo: '',
+  tiene_cedula: '',
   folio: '',
   // Contratante
   contratante_nombres: '',
@@ -507,6 +514,7 @@ export const INITIAL_FORM_DATA: FormData = {
   clabe: '',
   banco: '',
   fecha_inicio_cobro: '',
+  imss_tipo: null,
   // Asegurado
   misma_persona: true,
   asegurado_nombres: '',
