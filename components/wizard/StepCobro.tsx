@@ -260,7 +260,21 @@ export default function StepCobro({ formData, setFormData, onNext, onBack }: Ste
 
                 {formData.imss_tipo === 'JUBILADO' && (
                   <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-sm font-medium text-blue-900">ℹ️ Para IMSS Jubilados se requiere carta de instrucción adicional</p>
+                    <p className="text-sm font-medium text-blue-900 mb-1">ℹ️ IMSS Jubilado — diferencias de emisión</p>
+                    <ul className="text-xs text-blue-800 space-y-1 list-disc list-inside">
+                      <li>Se usará <strong>Dependencia/Subdependencia/Contrato de Jubilados</strong> en el portal GNP (distinto a Activos)</li>
+                      <li>El talón muestra ingreso mensual de la institución</li>
+                      <li>La póliza tendrá <strong>recibos de cobro mensuales</strong> (no quincenales)</li>
+                    </ul>
+                  </div>
+                )}
+                {formData.imss_tipo === 'ACTIVO' && (
+                  <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-3">
+                    <p className="text-sm font-medium text-green-900 mb-1">✅ IMSS Activo — cobro quincenal por nómina</p>
+                    <ul className="text-xs text-green-800 space-y-1 list-disc list-inside">
+                      <li>Se usará <strong>Dependencia/Subdependencia/Contrato de Activos</strong> en el portal GNP</li>
+                      <li>Cobro vía descuento por nómina quincenal</li>
+                    </ul>
                   </div>
                 )}
               </div>
