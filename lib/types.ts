@@ -124,6 +124,19 @@ export interface PlanInfo {
 }
 
 // ----------------------------------------------------------
+// Sub-entity: QuoteConfirmation (tarifario validation)
+// ----------------------------------------------------------
+export interface QuoteConfirmation {
+  plan: string
+  prima_quincenal: number
+  suma_asegurada: number
+  edad_calculo: number
+  descuentos_aplicados: string[]
+  data_quality: string
+  confirmed_at: string
+}
+
+// ----------------------------------------------------------
 // Root form type — preserves all flat fields for the form
 // wizard while making each entity explicitly nameable
 // ----------------------------------------------------------
@@ -220,7 +233,20 @@ export interface FormData {
   // Step 6: Beneficiarios (1+, sum must equal 100)
   beneficiarios: Beneficiario[]
 
+  // Step 6.5: Quote Confirmation (tarifario)
+  quote_confirmation?: QuoteConfirmation
+
   // Step 7: Documents (stored as paths/URLs)
+  // OCR-prefilled fields (populated from talón/INE extraction)
+  ocr_clave_presupuestal?: string
+  ocr_centro_trabajo?: string
+  ocr_llave_descuento?: string
+  ocr_concepto_descuento?: string
+  ocr_tipo_contratacion?: string
+  ocr_liquido_a_cobrar?: string
+  ocr_clave_elector?: string
+  ocr_sourced_fields?: string[]  // field names populated by OCR (for visual indicator)
+
   docs_ine_frente?: string
   docs_ine_reverso?: string
   docs_talon?: string
@@ -235,7 +261,16 @@ export interface FormData {
   docs_solicitud_p6?: string
   docs_video?: string
 
-  // Step 8: Firma
+  // Step 8: Video verification (7 requirements)
+  video_datos_personales?: string
+  video_beneficiarios?: string
+  video_forma_cobro?: string
+  video_otros_seguros?: string
+  video_salud_actividad?: string
+  video_firma_solicitud_p1?: string
+  video_firma_condiciones_p2?: string
+
+  // Step 9: Firma
   firma_base64?: string
 }
 
@@ -572,6 +607,15 @@ export const INITIAL_FORM_DATA: FormData = {
   suma_asegurada: '',
   base_calculo: 'prima',
   beneficiarios: [],
+  // OCR prefill tracking
+  ocr_clave_presupuestal: '',
+  ocr_centro_trabajo: '',
+  ocr_llave_descuento: '',
+  ocr_concepto_descuento: '',
+  ocr_tipo_contratacion: '',
+  ocr_liquido_a_cobrar: '',
+  ocr_clave_elector: '',
+  ocr_sourced_fields: [],
 }
 
 export const PARENTESCOS = [

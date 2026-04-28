@@ -12,9 +12,10 @@ const STEPS: Step[] = [
   { id: 3, label: 'Forma de Cobro', shortLabel: 'Cobro' },
   { id: 4, label: 'Asegurado', shortLabel: 'Aseg.' },
   { id: 5, label: 'Plan', shortLabel: 'Plan' },
-  { id: 6, label: 'Beneficiarios', shortLabel: 'Benef.' },
-  { id: 7, label: 'Documentos', shortLabel: 'Docs' },
-  { id: 8, label: 'Revisión', shortLabel: 'Rev.' },
+  { id: 6, label: 'Cotización', shortLabel: 'Cotiz.' },
+  { id: 7, label: 'Beneficiarios', shortLabel: 'Benef.' },
+  { id: 8, label: 'Documentos', shortLabel: 'Docs' },
+  { id: 9, label: 'Revisión', shortLabel: 'Rev.' },
 ]
 
 interface WizardProgressProps {

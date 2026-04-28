@@ -10,6 +10,7 @@ import StepAsegurado from '@/components/wizard/StepAsegurado'
 import StepPlan from '@/components/wizard/StepPlan'
 import StepBeneficiarios from '@/components/wizard/StepBeneficiarios'
 import StepDocumentos from '@/components/wizard/StepDocumentos'
+import StepTarifario from '@/components/wizard/StepTarifario'
 import StepReview from '@/components/wizard/StepReview'
 import { FormData, INITIAL_FORM_DATA } from '@/lib/types'
 import { getCurrentSemana, generateFolio } from './actions'
@@ -139,7 +140,7 @@ function SolicitudPageInner() {
 
   function goNext() {
     setCompletedSteps(prev => new Set([...prev, currentStep]))
-    setCurrentStep(prev => Math.min(prev + 1, 8))
+    setCurrentStep(prev => Math.min(prev + 1, 9))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -225,9 +226,10 @@ function SolicitudPageInner() {
         {currentStep === 3 && <StepCobro {...stepProps} />}
         {currentStep === 4 && <StepAsegurado {...stepProps} />}
         {currentStep === 5 && <StepPlan {...stepProps} />}
-        {currentStep === 6 && <StepBeneficiarios {...stepProps} />}
-        {currentStep === 7 && <StepDocumentos {...stepProps} />}
-        {currentStep === 8 && (
+        {currentStep === 6 && <StepTarifario {...stepProps} />}
+        {currentStep === 7 && <StepBeneficiarios {...stepProps} />}
+        {currentStep === 8 && <StepDocumentos {...stepProps} />}
+        {currentStep === 9 && (
           <StepReview
             formData={formData}
             onBack={goBack}
