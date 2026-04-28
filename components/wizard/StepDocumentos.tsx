@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress'
 import { FormData } from '@/lib/types'
 import imageCompression from 'browser-image-compression'
 import { DocRequirement, getDependenciaRequirements, getMissingRequiredDocs } from '@/lib/dependencia-rules'
+import { buildTalonPrefillPatch, buildINEPrefillPatch, isFieldFromOCR } from '@/lib/ocr/prefill'
 
 interface StepDocumentosProps {
   formData: FormData
@@ -217,6 +218,21 @@ export default function StepDocumentos({ formData, setFormData, onNext, onBack }
           warnings,
         },
       })
+
+      // Pre-fill form fields from OCR extraction
+      if (summary.length > 0) {
+        const prefillPatch = type === 'talon'
+          ? buildTalonPrefillPatch(extracted as unknown as Parameters<typeof buildTalonPrefillPatch>[0])
+          : buildINEPrefillPatch(extracted as unknown as Parameters<typeof buildINEPrefillPatch>[0])
+        // Merge: accumulate sourced fields across multiple OCR runs
+        const existing = (formData as unknown as Record<string, unknown>).ocr_sourced_fields
+        const newSourced = (prefillPatch as unknown as Record<string, unknown>).ocr_sourced_fields as string[] | undefined
+        if (Array.isArray(newSourced)) {
+          const merged = [...new Set([...(Array.isArray(existing) ? existing : []), ...newSourced])]
+          ;(prefillPatch as Record<string, unknown>).ocr_sourced_fields = merged
+        }
+        setFormData(prefillPatch as Partial<FormData>)
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'No se pudo extraer OCR'
       setState(key, {
@@ -358,7 +374,9 @@ export default function StepDocumentos({ formData, setFormData, onNext, onBack }
                       {s.ocr.summary.map((item) => (
                         <div key={item.label} className="flex gap-2">
                           <dt className="font-medium min-w-[82px]">{item.label}:</dt>
-                          <dd className="truncate">{item.value}</dd>
+                          <dd className="truncate">
+                            <span className="text-blue-600">✦</span> {item.value}
+                          </dd>
                         </div>
                       ))}
                     </dl>
@@ -489,6 +507,67 @@ export default function StepDocumentos({ formData, setFormData, onNext, onBack }
           </CardContent>
         </Card>
       ))}
+
+      {/* OCR Pre-fill Summary — shows which form fields were auto-populated */}
+      {(() => {
+        const sourcedFields = (formData as unknown as Record<string, unknown>).ocr_sourced_fields as string[] | undefined
+        if (!Array.isArray(sourcedFields) || sourcedFields.length === 0) return null
+
+        const FIELD_LABELS: Record<string, string> = {
+          contratante_dependencia: 'Dependencia',
+          contratante_rfc: 'RFC',
+          contratante_nombres: 'Nombre',
+          contratante_curp: 'CURP',
+          contratante_calle: 'Dirección',
+          matricula: 'Matrícula',
+          clave_delegacional: 'Clave Delegacional',
+          ocr_clave_presupuestal: 'Clave Presupuestal',
+          ocr_centro_trabajo: 'Centro de Trabajo',
+          ocr_llave_descuento: 'Llave de Descuento',
+          ocr_concepto_descuento: 'Concepto de Descuento',
+          ocr_tipo_contratacion: 'Tipo de Contratación',
+          ocr_liquido_a_cobrar: 'Líquido a Cobrar',
+          ocr_clave_elector: 'Clave Elector',
+        }
+
+        return (
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-start gap-2">
+                <span className="text-blue-600 text-lg mt-0.5">📋</span>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-blue-900">
+                    Datos pre-llenados por OCR ({sourcedFields.length})
+                  </p>
+                  <p className="text-xs text-blue-700 mt-1 mb-3">
+                    Estos campos se llenaron automáticamente. Puedes editarlos en los pasos siguientes.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {sourcedFields.map((fieldKey) => {
+                      const value = (formData as unknown as Record<string, unknown>)[fieldKey]
+                      const label = FIELD_LABELS[fieldKey] || fieldKey
+                      return (
+                        <div
+                          key={fieldKey}
+                          className="flex items-center gap-2 rounded-md border border-blue-200 bg-white px-2.5 py-1.5"
+                        >
+                          <span className="text-blue-500 text-xs">✦</span>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-xs text-gray-500 block">{label}</span>
+                            <span className="text-sm text-gray-800 font-medium truncate block">
+                              {String(value || '—')}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )
+      })()}
 
       <div className="flex gap-3 pt-2">
         <Button variant="outline" onClick={onBack} className="flex-1 h-12">
