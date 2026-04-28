@@ -239,6 +239,28 @@ export interface FormData {
   firma_base64?: string
 }
 
+
+// ----------------------------------------------------------
+// OCR persistence contract (solicitud_documentos)
+// ----------------------------------------------------------
+export type OCRPersistenceStatus = 'skipped' | 'pending' | 'processing' | 'done' | 'failed'
+export type OCRPersistenceDocumentType = 'talon' | 'ine'
+
+export interface SolicitudDocumentoOCRPersistence {
+  ocr_state: OCRPersistenceStatus
+  ocr_at?: string | null
+  ocr_payload?: Record<string, unknown> | null
+  ocr_data?: Record<string, unknown> | null
+  ocr_raw?: string | null
+  ocr_error?: string | null
+  ocr_errors?: string[]
+  ocr_confidence?: number | null
+  ocr_provider?: string | null
+  ocr_model?: string | null
+  ocr_document_type?: OCRPersistenceDocumentType | null
+  ocr_processed_at?: string | null
+}
+
 // ----------------------------------------------------------
 // Entity extractors
 // Convenience helpers to extract typed sub-entities from

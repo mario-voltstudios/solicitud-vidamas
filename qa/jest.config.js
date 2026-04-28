@@ -26,6 +26,7 @@ module.exports = {
     '../lib/intake-status.ts',
     '../lib/types.ts',
     '../lib/release-folder-rules.ts',
+    '../lib/ocr/**/*.ts',
   ],
   reporters: [
     'default',

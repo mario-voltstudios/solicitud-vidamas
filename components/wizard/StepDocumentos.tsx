@@ -15,6 +15,18 @@ interface StepDocumentosProps {
   onBack: () => void
 }
 
+type OCRStatus = 'pending' | 'extracting' | 'success' | 'review-needed' | 'error' | 'manual'
+
+type OCRDocumentType = 'talon' | 'ine'
+
+interface OCRState {
+  status: OCRStatus
+  type: OCRDocumentType
+  summary?: Array<{ label: string; value: string }>
+  warnings?: string[]
+  error?: string
+}
+
 interface DocUploadState {
   status: 'idle' | 'compressing' | 'uploading' | 'done' | 'error'
   progress: number
@@ -23,6 +35,7 @@ interface DocUploadState {
   signedUrl?: string
   filename?: string
   isVideo?: boolean
+  ocr?: OCRState
 }
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -85,6 +98,76 @@ function groupByCategory(requirements: DocRequirement[]) {
   }, {})
 }
 
+function getOCRDocumentType(key: string): OCRDocumentType | null {
+  if (key === 'talon') return 'talon'
+  if (key === 'ine_frente' || key === 'ine_reverso') return 'ine'
+  return null
+}
+
+function formatOCRValue(value: unknown): string | null {
+  if (value === null || value === undefined) return null
+  if (typeof value === 'string') return value.trim() || null
+  if (typeof value === 'number') return Number.isFinite(value) ? String(value) : null
+  return null
+}
+
+function buildOCRSummary(type: OCRDocumentType, extracted: Record<string, unknown>): Array<{ label: string; value: string }> {
+  const fields = type === 'talon'
+    ? [
+        ['Dependencia', 'institucion'],
+        ['Matrícula', 'matricula'],
+        ['RFC', 'rfc'],
+        ['Concepto', 'concepto_descuento'],
+        ['Líquido', 'liquido_a_cobrar'],
+      ]
+    : [
+        ['Nombre', 'nombre_completo'],
+        ['CURP', 'curp'],
+        ['Clave elector', 'clave_elector'],
+        ['Dirección', 'direccion'],
+      ]
+
+  return fields.flatMap(([label, key]) => {
+    const value = formatOCRValue(extracted[key])
+    return value ? [{ label, value }] : []
+  }).slice(0, 5)
+}
+
+function collectOCRWarnings(data: unknown): string[] {
+  if (!data || typeof data !== 'object') return []
+  const payload = data as {
+    warnings?: unknown
+    validation?: { errors?: unknown; warnings?: unknown; isValid?: boolean }
+  }
+  const warnings = [
+    ...(Array.isArray(payload.warnings) ? payload.warnings : []),
+    ...(Array.isArray(payload.validation?.warnings) ? payload.validation.warnings : []),
+    ...(Array.isArray(payload.validation?.errors) ? payload.validation.errors : []),
+  ]
+  return warnings.map(String).filter(Boolean).slice(0, 4)
+}
+
+function getOCRStatusLabel(status: OCRStatus) {
+  switch (status) {
+    case 'pending': return 'OCR pendiente'
+    case 'extracting': return 'Extrayendo datos...'
+    case 'success': return 'OCR listo'
+    case 'review-needed': return 'Revisar datos OCR'
+    case 'error': return 'OCR con error'
+    case 'manual': return 'Captura manual disponible'
+  }
+}
+
+function getOCRStatusClass(status: OCRStatus) {
+  switch (status) {
+    case 'success': return 'border-green-200 bg-green-50 text-green-800'
+    case 'review-needed': return 'border-amber-200 bg-amber-50 text-amber-800'
+    case 'error': return 'border-red-200 bg-red-50 text-red-800'
+    case 'extracting': return 'border-blue-200 bg-blue-50 text-blue-800'
+    default: return 'border-gray-200 bg-gray-50 text-gray-700'
+  }
+}
+
 export default function StepDocumentos({ formData, setFormData, onNext, onBack }: StepDocumentosProps) {
   const [uploadStates, setUploadStates] = useState<Record<string, DocUploadState>>({})
 
@@ -99,11 +182,65 @@ export default function StepDocumentos({ formData, setFormData, onNext, onBack }
     }))
   }
 
+  async function runOCR(key: string, type: OCRDocumentType, imageUrl: string) {
+    setState(key, { ocr: { status: 'extracting', type } })
+
+    try {
+      const response = await fetch('/api/ocr/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, imageUrl }),
+      })
+      const payload = await response.json()
+
+      if (!response.ok || !payload.success) {
+        setState(key, {
+          ocr: {
+            status: 'error',
+            type,
+            error: payload.error || 'No se pudo extraer OCR. Puedes continuar manualmente.',
+          },
+        })
+        return
+      }
+
+      const extracted = (payload.data?.extracted || {}) as Record<string, unknown>
+      const warnings = collectOCRWarnings(payload.data)
+      const summary = buildOCRSummary(type, extracted)
+      const isValid = payload.data?.validation?.isValid !== false
+
+      setState(key, {
+        ocr: {
+          status: isValid && warnings.length === 0 && summary.length > 0 ? 'success' : 'review-needed',
+          type,
+          summary,
+          warnings,
+        },
+      })
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'No se pudo extraer OCR'
+      setState(key, {
+        ocr: {
+          status: 'error',
+          type,
+          error: `${msg}. Puedes continuar con captura manual.`,
+        },
+      })
+    }
+  }
+
   async function handleFileUpload(key: string, file: File, attempt = 1) {
     const isVideo = file.type.startsWith('video/')
     const isImage = file.type.startsWith('image/')
+    const ocrType = getOCRDocumentType(key)
 
-    setState(key, { status: 'compressing', progress: 0, error: undefined, isVideo })
+    setState(key, {
+      status: 'compressing',
+      progress: 0,
+      error: undefined,
+      isVideo,
+      ocr: ocrType ? { status: 'pending', type: ocrType } : undefined,
+    })
 
     try {
       let uploadFile: File | Blob = file
@@ -154,6 +291,18 @@ export default function StepDocumentos({ formData, setFormData, onNext, onBack }
       })
 
       setFormData({ [`docs_${key}`]: filename } as Partial<FormData>)
+
+      if (ocrType && signedUrl) {
+        void runOCR(key, ocrType, signedUrl)
+      } else if (ocrType) {
+        setState(key, {
+          ocr: {
+            status: 'manual',
+            type: ocrType,
+            error: 'No se pudo generar URL para OCR. Puedes continuar con captura manual.',
+          },
+        })
+      }
     } catch (err: unknown) {
       if (attempt < 3) {
         setState(key, { status: 'uploading', progress: 0, error: `Reintentando... (${attempt}/3)` })
@@ -194,6 +343,41 @@ export default function StepDocumentos({ formData, setFormData, onNext, onBack }
               )}
 
               {s.error && <p className="text-red-500 text-xs mt-1">{s.error}</p>}
+
+              {s.ocr && (
+                <div className={`mt-2 rounded-lg border p-2 text-xs ${getOCRStatusClass(s.ocr.status)}`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium">{getOCRStatusLabel(s.ocr.status)}</span>
+                    {s.ocr.status === 'extracting' && (
+                      <span className="h-3 w-3 rounded-full border-2 border-current border-t-transparent animate-spin" aria-hidden="true" />
+                    )}
+                  </div>
+
+                  {s.ocr.summary && s.ocr.summary.length > 0 && (
+                    <dl className="mt-2 grid grid-cols-1 gap-1">
+                      {s.ocr.summary.map((item) => (
+                        <div key={item.label} className="flex gap-2">
+                          <dt className="font-medium min-w-[82px]">{item.label}:</dt>
+                          <dd className="truncate">{item.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+
+                  {s.ocr.warnings && s.ocr.warnings.length > 0 && (
+                    <ul className="mt-2 list-disc pl-4 space-y-0.5">
+                      {s.ocr.warnings.map((warning) => (
+                        <li key={warning}>{warning}</li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {s.ocr.error && <p className="mt-1">{s.ocr.error}</p>}
+                  {['review-needed', 'error', 'manual'].includes(s.ocr.status) && (
+                    <p className="mt-1 font-medium">No bloquea el envío; revisa o captura los datos manualmente.</p>
+                  )}
+                </div>
+              )}
 
               {isDone && s.previewUrl && !isVideo && (
                 <div className="mt-2">
