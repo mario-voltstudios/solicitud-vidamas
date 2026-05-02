@@ -11,6 +11,9 @@ import { backupFilesToDrive } from '@/lib/google-drive'
 import { getUploadedDocs } from '@/lib/dependencia-rules'
 import { deriveIntakeStatus } from '@/lib/intake-status'
 import { runIntakeFiltro } from '@/lib/filtro-calidad/intake-hook'
+import { generateAndStoreSolicitudPdf } from '@/lib/pdf-generator'
+import { extractTalon, extractINE } from '@/lib/ocr/extract'
+import { buildOCRSuccessPersistencePatch, buildOCRFailurePersistencePatch } from '@/lib/ocr/persistence'
 
 const INEDataSchema = z.object({
   nombres: z.string().describe('First name(s) of the person'),
@@ -98,6 +101,22 @@ export async function extractINEData(imageBase64: string, mimeType: string) {
       error: `Error al procesar INE: ${errMsg.substring(0, 100)}. Llena los datos manualmente.` 
     }
   }
+}
+
+export async function getAgentes() {
+  const supabase = createServerClient()
+  const { data, error } = await supabase
+    .from('agentes')
+    .select('clave, nombre_completo, nombre_corto, status')
+    .not('nombre_completo', 'is', null)
+    .not('clave', 'is', null)
+    .order('nombre_completo', { ascending: true })
+
+  if (error) {
+    return { success: false, error: error.message, agentes: [] }
+  }
+
+  return { success: true, agentes: data || [] }
 }
 
 export async function validateAgente(clave: string) {
@@ -351,6 +370,26 @@ export async function submitSolicitud(formData: FormData) {
   }
   // ─────────────────────────────────────────────────────────────────────────
 
+  // ── Post-submission pipeline (fire-and-forget) ──────────────────────────
+  const solicitudId = data.id
+
+  // 1. Generate PDF from template
+  generateAndStoreSolicitudPdf(solicitudId).then((pdfResult) => {
+    console.log(`[PDF] Generated for ${data.folio}: ${pdfResult.storagePath}`)
+  }).catch((err) => {
+    console.error(`[PDF] Generation failed for ${data.folio}:`, err)
+  })
+
+  // 2. Run OCR on uploaded INE and talón documents
+  const docsToOcr = Object.entries(docs).filter(([docType]) =>
+    ['ine_frente', 'ine_reverso', 'talon'].includes(docType)
+  )
+  for (const [docType, storagePath] of docsToOcr) {
+    runOcrOnDocument(solicitudId, docType, storagePath).catch((err) =>
+      console.error(`[OCR] Failed for ${docType}:`, err)
+    )
+  }
+
   return {
     success: true,
     id: data.id,
@@ -358,5 +397,51 @@ export async function submitSolicitud(formData: FormData) {
     status: intakeStatus,
     missingRequiredDocs: intake.missingDocs,
     missingVerification: intake.missingVerification,
+  }
+}
+
+// ── OCR helper ─────────────────────────────────────────────────────────────
+async function runOcrOnDocument(
+  solicitudId: string,
+  docType: string,
+  storagePath: string,
+) {
+  const supabase = createServerClient()
+  const ocrDocType = docType.includes('ine') ? 'ine' : 'talon'
+
+  try {
+    // Get signed URL for the document
+    const { data: urlData } = await supabase.storage
+      .from('solicitud-docs')
+      .createSignedUrl(storagePath, 60 * 5)
+
+    if (!urlData?.signedUrl) {
+      console.error(`[OCR] No signed URL for ${storagePath}`)
+      return
+    }
+
+    const result = ocrDocType === 'ine'
+      ? (await extractINE(urlData.signedUrl, { validate: true })).result
+      : (await extractTalon(urlData.signedUrl, { validate: true })).result
+
+    const patch = buildOCRSuccessPersistencePatch(result)
+    await supabase
+      .from('solicitud_documentos')
+      .update(patch)
+      .eq('solicitud_id', solicitudId)
+      .eq('doc_type', docType)
+      .eq('is_latest', true)
+
+    console.log(`[OCR] Done for ${docType}: confidence=${result.confidence}`)
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err)
+    const patch = buildOCRFailurePersistencePatch(errMsg, ocrDocType as 'ine' | 'talon')
+    await supabase
+      .from('solicitud_documentos')
+      .update(patch)
+      .eq('solicitud_id', solicitudId)
+      .eq('doc_type', docType)
+      .eq('is_latest', true)
+    console.error(`[OCR] Failed for ${docType}:`, errMsg)
   }
 }

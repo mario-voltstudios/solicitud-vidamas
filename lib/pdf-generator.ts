@@ -4,7 +4,8 @@ import path from 'node:path'
 import { createServerClient } from '@/lib/supabase'
 import type { FormData, Beneficiario } from '@/lib/types'
 
-const TEMPLATE_PATH = path.join(process.cwd(), '..', 'emisiones-ref', 'gnp-solicitud-vida-template.pdf')
+const TEMPLATE_PATH = process.env.PDF_TEMPLATE_PATH
+  || path.join(process.cwd(), 'templates', 'gnp-solicitud-vida-template.pdf')
 const STORAGE_BUCKET = 'solicitud-docs'
 const GENERATED_DOC_TYPE = 'solicitud_pdf_generada'
 
