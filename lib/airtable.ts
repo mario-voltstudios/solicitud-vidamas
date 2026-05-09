@@ -6,7 +6,18 @@ const AIRTABLE_BASE = 'app4s0fxoSQStY8Jn'
 const AIRTABLE_TABLE = 'tblQx1hUA3JoDgcH0'
 const AIRTABLE_API = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`
 
+function isAirtableBackupEnabled() {
+  const value = process.env.AIRTABLE_BACKUP_ENABLED
+  if (!value) return true
+  return !['0', 'false', 'no', 'off'].includes(value.trim().toLowerCase())
+}
+
 export async function createAirtableRecord(formData: FormData): Promise<void> {
+  if (!isAirtableBackupEnabled()) {
+    console.log(`[Airtable] Backup disabled by AIRTABLE_BACKUP_ENABLED for folio ${formData.folio}`)
+    return
+  }
+
   const pat = process.env.AIRTABLE_PAT
   if (!pat) {
     console.error('[Airtable] AIRTABLE_PAT env var not set')
