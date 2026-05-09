@@ -6,7 +6,7 @@ _Last checked: 2026-05-09 UTC_
 
 From the app perspective, the new Next.js intake can replace Paperform once Mario approves the public redirect/cutover. Paperform should remain read-only/backup until that approval.
 
-Production evidence from `node scripts/verify_paperform_extraction.mjs` on 2026-05-09:
+Production evidence from the 2026-05-09 readiness run:
 
 - Recent fixture Paperform row `69dd66c5e0e7099896031399` transforms correctly from `raw_data.data`.
 - April stranded rows where `numero_solicitud IS NULL`: `0`.
