@@ -23,14 +23,15 @@
 //   - Do NOT process the same Gmail message ID twice (idempotent upsert).
 // ============================================================
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { google } from 'googleapis'
 import {
-  parseEmailForPolicy,
   scanEmailsForPolicies,
   type RawEmailMessage,
 } from '../lib/filtro-calidad/email-intel'
 import type { EmailPolicyEvent } from '../lib/filtro-calidad/types'
+
+type PersistedEmailPolicyEvent = Omit<EmailPolicyEvent, 'occurred_at'> & { occurred_at: string }
 
 // ----------------------------------------------------------
 // Args
@@ -79,8 +80,7 @@ async function getGmailClient() {
 // ----------------------------------------------------------
 // Fetch active policy numbers from DB
 // ----------------------------------------------------------
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function getActivePolicyNumbers(supabase: any): Promise<string[]> {
+async function getActivePolicyNumbers(supabase: SupabaseClient): Promise<string[]> {
   // Try polizas table first, fall back to solicitudes
   const { data: polizas } = await supabase
     .from('polizas')
@@ -115,9 +115,8 @@ function stripLeadingZeros(pn: string): string {
 // ----------------------------------------------------------
 // Fetch already-ingested message IDs (idempotency)
 // ----------------------------------------------------------
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getIngestedMessageIds(
-  supabase: any
+  supabase: SupabaseClient
 ): Promise<Set<string>> {
   const { data } = await supabase
     .from('email_policy_events')
@@ -260,8 +259,7 @@ async function main() {
   }
 
   // 6. Upsert events into email_policy_events
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const allEvents: any[] = []
+  const allEvents: PersistedEmailPolicyEvent[] = []
   for (const events of eventMap.values()) {
     for (const ev of events) {
       allEvents.push({

@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { execFile } from 'node:child_process'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import { promisify } from 'node:util'
+import ffmpegPath from 'ffmpeg-static'
 import { buildSolicitudS3Key, uploadSolicitudFileToS3, getSolicitudFileSignedUrl } from '@/lib/s3'
 
 export const runtime = 'nodejs'
 export const maxDuration = 120 // videos can take longer
 
 const MAX_FILE_BYTES = 500 * 1024 * 1024 // 500MB
+const execFileAsync = promisify(execFile)
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,14 +68,6 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Compression via FFmpeg ──────────────────────────────
-    const fs = require('fs')
-    const os = require('os')
-    const path = require('path')
-    const { execFile } = require('child_process')
-    const { promisify } = require('util')
-    const execFileAsync = promisify(execFile)
-
-    const ffmpegPath = require('ffmpeg-static')
     if (!ffmpegPath) {
       return NextResponse.json({ success: false, error: 'FFmpeg no disponible en el servidor' }, { status: 500 })
     }

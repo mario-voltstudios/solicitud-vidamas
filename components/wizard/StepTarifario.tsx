@@ -49,7 +49,11 @@ export default function StepTarifario({ formData, setFormData, onNext, onBack }:
   }, [formData])
 
   useEffect(() => {
-    loadQuote()
+    const timeoutId = window.setTimeout(() => {
+      void loadQuote()
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
   }, [loadQuote])
 
   function handleConfirm() {
