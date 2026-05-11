@@ -4,6 +4,15 @@
 // ============================================================
 
 import { createServerClient } from '@/lib/supabase'
+import { getSolicitudFileFromS3 } from '@/lib/s3'
+import { execFile } from 'node:child_process'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import { promisify } from 'node:util'
+import ffmpegPath from 'ffmpeg-static'
+
+const execFileAsync = promisify(execFile)
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -42,15 +51,7 @@ export async function extractVideoFrames(
   inputPathOrUrl: string,
   frameCount = 8
 ): Promise<string[]> {
-  const ffmpegPath = require('ffmpeg-static')
   if (!ffmpegPath) throw new Error('ffmpeg-static not available')
-
-  const { execFile } = require('child_process')
-  const { promisify } = require('util')
-  const execFileAsync = promisify(execFile)
-  const fs = require('fs')
-  const os = require('os')
-  const path = require('path')
 
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'vid-frames-'))
   const frames: string[] = []
@@ -160,11 +161,6 @@ export async function verifyVideo(input: VerificationInput): Promise<Verificatio
   const startMs = Date.now()
 
   // 1. Download video from S3 to temp for frame extraction
-  const fs = require('fs')
-  const os = require('os')
-  const path = require('path')
-  const { getSolicitudFileFromS3 } = require('@/lib/s3')
-
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'vid-verify-'))
   const tmpVideoPath = path.join(tmpDir, 'video.mp4')
 

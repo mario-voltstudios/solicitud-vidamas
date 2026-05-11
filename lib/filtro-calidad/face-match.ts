@@ -93,10 +93,7 @@ const noneProvider: FaceMatchProvider = {
 async function getRekognitionProvider(): Promise<FaceMatchProvider> {
   try {
     // Dynamic import — install @aws-sdk/client-rekognition to enable
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { RekognitionClient, CompareFacesCommand } = await import(
-      '@aws-sdk/client-rekognition' as string
-    ) as any
+    const { RekognitionClient, CompareFacesCommand } = await import('@aws-sdk/client-rekognition')
     const client = new RekognitionClient({ region: process.env.AWS_REGION ?? 'us-east-1' })
     return {
       name: 'rekognition',
